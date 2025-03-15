@@ -1,8 +1,7 @@
 import { Injectable } from "@nestjs/common";
-import { UserMapOutput, UserType } from "../type/auth.type";
+import { EmailConfirmationWithUser, UserMapOutput, UserType } from "../type/auth.type";
 import { PrismaService } from "../../shared/prisma/prisma.service";
 import { Result } from "apps/api-gateway/generalTypes/errorResponseType";
-import { User } from "@prisma/client";
 import { userMapOutputModul } from "../modules/output/user.map.module";
 
 @Injectable()
@@ -49,34 +48,72 @@ export class AuthRepository {
         }
     }
 
-    // async findUserByConfirEmail(code: string): Promise<Result<User>> {
-    //     try {
+    async findUserByConfirEmail(code: string): Promise<Result<EmailConfirmationWithUser>> {
+        try {
 
-    //         const result = await this.prisma.user.findFirst({
-    //             where: {
-    //                 confirmationCode: code, // Фильтруем по confirmationCode
-    //             },
-    //         });
+            const emailConfirmation = await this.prisma.emailConfirmation.findFirst({
+                where: {
+                    confirmationCode: code,
+                },
+                include: {
+                    user: true,
+                },
+            });
 
-    //         if (!result) {
-    //             throw new Error()
-    //         }
 
-    //         return {
-    //             success: true,
-    //             message: 'confirmation code is correct',
-    //             data: [result]
-    //         };
+            if (!emailConfirmation) {
+                throw new Error()
+            }
 
-    //     } catch (error) {
+            return {
+                success: true,
+                message: 'confirmation code is correct',
+                data: [emailConfirmation]
+            };
 
-    //         return {
-    //             success: false,
-    //             message: 'confirmation code is incorrect',
-    //             data: []
-    //         }
+        } catch (error) {
 
-    //     }
-    // }
+            return {
+                success: false,
+                message: 'confirmation code is incorrect',
+                data: []
+            }
+
+        }
+    }
+
+    async updateConfirmation(userId: string): Promise<Result> {
+        try {
+
+            const result = await this.prisma.emailConfirmation.updateMany({
+                where: {
+                    userId: userId,
+                },
+                data: {
+                    isConfirmed: true,
+                },
+            });
+
+            if (result.count === 0) {
+                throw new Error()
+            }
+
+            return {
+                success: true,
+                message: 'mail confirmed',
+                data: []
+            };
+
+        } catch (error) {
+
+            return {
+                success: false,
+                message: 'mail not confirmed',
+                data: []
+            };
+
+        }
+    }
+
 
 }

@@ -4,12 +4,13 @@ import { CreateUserCommand } from "../application/use-case/create.user.case";
 import { CommandBus } from "@nestjs/cqrs";
 import { UserMapOutput } from "../type/auth.type";
 import { Result } from "apps/api-gateway/generalTypes/errorResponseType";
+import { EmailServece } from "../application/emai.sevece";
 
 
 
 @Controller('auth')
 export class AuthController {
-    constructor(protected commandBuse: CommandBus) { }
+    constructor(protected commandBuse: CommandBus, protected emaiServece: EmailServece) { }
 
     @Post("registration")
     @HttpCode(201)
@@ -32,18 +33,18 @@ export class AuthController {
         return { message: `We have sent a link to confirm your email to ${inputModul.email}` };
     }
 
-    // @Post("registration-confirmation")
-    // @HttpCode(204)
-    // async registrationConfirmation(@Body("code") code: string) {
+    @Post("registration-confirmation")
+    @HttpCode(204)
+    async registrationConfirmation(@Body("code") code: string) {
 
-    //     const user = await this.authService.confirmEmail(code);
-    //     if (!user) {
-    //         throw new HttpException({
-    //             message: [
-    //                 { message: 'User not found', field: 'code' },
-    //             ]
-    //         }, HttpStatus.BAD_REQUEST);
-    //     }
+        const user = await this.emaiServece.confirmEmail(code);
+        if (!user.success) {
+            throw new HttpException({
+                message: [
+                    { message: user.message, field: 'code' },
+                ]
+            }, HttpStatus.BAD_REQUEST);
+        }
 
-    // }
+    }
 }

@@ -1,7 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import * as nodemailer from 'nodemailer';
 import { AuthRepository } from "../infrastructure/auth.repository";
-import { UserMapOutput } from "../type/auth.type";
+import { EmailConfirmationWithUser, UserMapOutput } from "../type/auth.type";
 import { Result } from "apps/api-gateway/generalTypes/errorResponseType";
 import { User } from "@prisma/client";
 
@@ -9,7 +9,7 @@ import { User } from "@prisma/client";
 
 @Injectable()
 export class EmailServece {
-    constructor(protected authRepository:AuthRepository) { }
+    constructor(protected authRepository: AuthRepository) { }
 
     async sendEmail(userCode: string, email: string, recoverePasswordCode?: string) {
         const transporter = nodemailer.createTransport({
@@ -50,30 +50,51 @@ export class EmailServece {
 
         return info;
     }
-    // async confirmEmail(code: string) {
 
-    //     const user: Result<User> = await this.authRepository.findUserByConfirEmail(code)
+    async confirmEmail(code: string): Promise<Result> {
+        // Step 1: Find email confirmation by code
+        const emailConfirmationResult = await this.authRepository.findUserByConfirEmail(code);
 
+        // If confirmation is not found or already confirmed, return an error
+        if (!emailConfirmationResult.success || emailConfirmationResult.data[0].isConfirmed) {
+            return {
+                success: false,
+                message: 'Email not confirmed or already confirmed',
+                data: [],
+            };
+        }
 
+        const emailConfirmation = emailConfirmationResult.data[0];
 
-    //     if (!user.success) {
-    //         return null;
-    //     }
+        // Step 2: Check if the confirmation code is valid and not expired
+        const expirationDate = new Date(emailConfirmation.expirationDate);
+        const isCodeValid = emailConfirmation.confirmationCode === code && expirationDate > new Date();
 
-    //     if (user.data[0].isConfirmed) {
-    //         return null
-    //     }
+        if (!isCodeValid) {
+            return {
+                success: false,
+                message: 'Invalid or expired confirmation code',
+                data: [],
+            };
+        }
 
-    //     const expirationDate = new Date(user.data[0].expirationDate);
+        // Step 3: Update the confirmation status
+        const isUpdated = await this.authRepository.updateConfirmation(emailConfirmation.userId);
 
-    //     if (user.data[0].confirmationCode === code && expirationDate > new Date()) {
-    //         const result = await this.authRepository.updateConfirmation(user.user.userId);
+        if (!isUpdated.success) {
+            return {
+                success: false,
+                message: 'Failed to update confirmation status',
+                data: [],
+            };
+        }
 
-    //         return result;
-    //     }
-
-    //     return null;
-    // }
-
+        // Step 4: Successful confirmation
+        return {
+            success: true,
+            message: 'Email confirmed successfully',
+            data: [],
+        };
+    }
 
 }
