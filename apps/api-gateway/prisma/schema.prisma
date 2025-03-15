@@ -1,0 +1,23 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  userId              String    @id @default(uuid()) // Primary Key, UUID
+  username        String
+  email           String    @unique
+  passwordHash    String
+  agreeToTerms    Boolean
+  createdAt       DateTime  @default(now()) // Автоматически устанавливается при создании
+  updatedAt       DateTime  @updatedAt // Автоматически обновляется при изменении
+  confirmationCode String
+  expirationDate  DateTime
+  isConfirmed     Boolean   @default(false)
+
+  @@map("users") // Опционально: задаем имя таблицы в БД
+}
