@@ -5,10 +5,12 @@ import { AuthServece } from './application/auth.servece';
 import { EmailServece } from './application/emai.sevece';
 import { CreateUserUseCase } from './application/use-case/create.user.case';
 import { CqrsModule } from '@nestjs/cqrs';
+import { EmailIsExistContsraint } from './utility/decorators/email-Is-exist.decorator';
+import { UserNameIsExistContsraint } from './utility/decorators/user-name-is.exist.decorator';
 
 
 
-const authProviders: Provider[] = [AuthRepository, AuthServece, EmailServece]
+const authProviders: Provider[] = [AuthRepository, AuthServece, EmailServece, EmailIsExistContsraint, UserNameIsExistContsraint]
 const useCaseAuth = [CreateUserUseCase]
 
 @Module({

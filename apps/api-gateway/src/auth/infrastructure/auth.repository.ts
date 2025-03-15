@@ -2,13 +2,13 @@ import { Injectable } from "@nestjs/common";
 import { EmailConfirmationWithUser, UserMapOutput, UserType } from "../type/auth.type";
 import { PrismaService } from "../../shared/prisma/prisma.service";
 import { Result } from "apps/api-gateway/generalTypes/errorResponseType";
-import { userMapOutputModul } from "../modules/output/user.map.module";
+import { User } from "@prisma/client";
 
 @Injectable()
 export class AuthRepository {
     constructor(protected prisma: PrismaService) { }
 
-    async createUser(inputModul: UserType): Promise<Result<UserMapOutput>> {
+    async createUser(inputModul: UserType): Promise<Result> {
         try {
 
             const user = await this.prisma.user.create({
@@ -34,7 +34,7 @@ export class AuthRepository {
             return {
                 success: true,
                 message: 'user successfully created in db',
-                data: [userMapOutputModul(user)]
+                data: [user]
             }
 
         } catch (error) {
@@ -115,5 +115,60 @@ export class AuthRepository {
         }
     }
 
+    async findIsEmail(email: string): Promise<Result<User>> {
+        try {
+            const user = await this.prisma.user.findUnique({
+                where: { email: email },
+            });
+
+            if (!user) {
+                return {
+                    success: false,
+                    message: `No user with such email: ${email}`,
+                    data: [],
+                };
+            }
+
+            return {
+                success: true,
+                message: `There is a user with such email: ${email}`,
+                data: [user],
+            };
+        } catch (error) {
+            return {
+                success: false,
+                message: 'An error occurred while searching for the user',
+                data: [],
+            };
+        }
+    }
+
+    async findIsUserName(username: string): Promise<Result<User>> {
+        try {
+            const user = await this.prisma.user.findUnique({
+                where: { username: username },
+            });
+
+            if (!user) {
+                return {
+                    success: false,
+                    message: `No user with such username: ${username}`,
+                    data: [],
+                };
+            }
+
+            return {
+                success: true,
+                message: `There is a user with such username: ${username}`,
+                data: [user],
+            };
+        } catch (error) {
+            return {
+                success: false,
+                message: 'An error occurred while searching for the user',
+                data: [],
+            };
+        }
+    }
 
 }

@@ -8,6 +8,8 @@ import {
     IsBoolean,
     Equals,
 } from 'class-validator';
+import { UserNameIsExist } from '../../utility/decorators/user-name-is.exist.decorator';
+import { EmailIsExist } from '../../utility/decorators/email-Is-exist.decorator';
 
 export class UserCreateModul {
     @IsString()
@@ -16,9 +18,12 @@ export class UserCreateModul {
     @Matches(/^[a-zA-Z0-9_-]+$/, {
         message: 'Username can only contain letters, numbers, underscores (_), and hyphens (-)',
     })
+    @UserNameIsExist()
+
     username: string;
 
     @IsEmail({}, { message: 'Invalid email format' })
+    @EmailIsExist()
     email: string;
 
     @IsString()

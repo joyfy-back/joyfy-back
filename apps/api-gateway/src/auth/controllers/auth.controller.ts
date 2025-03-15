@@ -16,7 +16,7 @@ export class AuthController {
     @HttpCode(201)
     async registerUser(@Body() inputModul: UserCreateModul) {
 
-        const user: Result<UserMapOutput> = await this.commandBuse.execute(
+        const user: Result = await this.commandBuse.execute(
             new CreateUserCommand(
                 inputModul.username,
                 inputModul.email,
