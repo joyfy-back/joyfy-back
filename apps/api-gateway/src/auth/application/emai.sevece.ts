@@ -1,11 +1,15 @@
 import { Injectable } from "@nestjs/common";
 import * as nodemailer from 'nodemailer';
+import { AuthRepository } from "../infrastructure/auth.repository";
+import { UserMapOutput } from "../type/auth.type";
+import { Result } from "apps/api-gateway/generalTypes/errorResponseType";
+import { User } from "@prisma/client";
 
 
 
 @Injectable()
 export class EmailServece {
-    constructor() { }
+    constructor(protected authRepository:AuthRepository) { }
 
     async sendEmail(userCode: string, email: string, recoverePasswordCode?: string) {
         const transporter = nodemailer.createTransport({
@@ -46,5 +50,30 @@ export class EmailServece {
 
         return info;
     }
+    // async confirmEmail(code: string) {
+
+    //     const user: Result<User> = await this.authRepository.findUserByConfirEmail(code)
+
+
+
+    //     if (!user.success) {
+    //         return null;
+    //     }
+
+    //     if (user.data[0].isConfirmed) {
+    //         return null
+    //     }
+
+    //     const expirationDate = new Date(user.data[0].expirationDate);
+
+    //     if (user.data[0].confirmationCode === code && expirationDate > new Date()) {
+    //         const result = await this.authRepository.updateConfirmation(user.user.userId);
+
+    //         return result;
+    //     }
+
+    //     return null;
+    // }
+
 
 }

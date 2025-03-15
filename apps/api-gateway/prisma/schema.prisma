@@ -8,17 +8,25 @@ datasource db {
 }
 
 model User {
-  userId              String    @id @default(uuid()) // Primary Key, UUID
-  username        String
-  email           String    @unique
-  passwordHash    String
-  agreeToTerms    Boolean
-  createdAt       DateTime  @default(now()) // Автоматически устанавливается при создании
-  updatedAt       DateTime  @updatedAt // Автоматически обновляется при изменении
+  userId         String             @id @default(uuid())
+  username       String
+  email          String             @unique
+  passwordHash   String
+  agreeToTerms   Boolean
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @updatedAt 
+  emailConfirmation EmailConfirmation?
+
+  @@map("users")
+}
+
+model EmailConfirmation {
+  id              String    @id @default(uuid())
   confirmationCode String
   expirationDate  DateTime
   isConfirmed     Boolean   @default(false)
+  userId          String    @unique 
+  user            User      @relation(fields: [userId], references: [userId], onDelete: Cascade)
 
-  @@map("users") // Опционально: задаем имя таблицы в БД
+  @@map("email_confirmations") //
 }
-

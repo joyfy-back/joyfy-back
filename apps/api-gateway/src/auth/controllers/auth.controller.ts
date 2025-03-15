@@ -12,7 +12,7 @@ export class AuthController {
     constructor(protected commandBuse: CommandBus) { }
 
     @Post("registration")
-    @HttpCode(204)
+    @HttpCode(201)
     async registerUser(@Body() inputModul: UserCreateModul) {
 
         const user: Result<UserMapOutput> = await this.commandBuse.execute(
@@ -29,6 +29,21 @@ export class AuthController {
             throw new HttpException('error when creating user', HttpStatus.BAD_REQUEST);
         }
 
+        return { message: `We have sent a link to confirm your email to ${inputModul.email}` };
     }
 
+    // @Post("registration-confirmation")
+    // @HttpCode(204)
+    // async registrationConfirmation(@Body("code") code: string) {
+
+    //     const user = await this.authService.confirmEmail(code);
+    //     if (!user) {
+    //         throw new HttpException({
+    //             message: [
+    //                 { message: 'User not found', field: 'code' },
+    //             ]
+    //         }, HttpStatus.BAD_REQUEST);
+    //     }
+
+    // }
 }

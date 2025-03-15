@@ -18,11 +18,19 @@ export class AuthRepository {
                     email: inputModul.email,
                     passwordHash: inputModul.passwordHash,
                     agreeToTerms: inputModul.agreeToTerms,
-                    confirmationCode: inputModul.emailConfirmation.confirmationCode,
-                    expirationDate: inputModul.emailConfirmation.expirationDate,
-                    isConfirmed: inputModul.emailConfirmation.isConfirmed
-                }
-            })
+                    emailConfirmation: {
+                        create: {
+                            confirmationCode: inputModul.emailConfirmation.confirmationCode,
+                            expirationDate: inputModul.emailConfirmation.expirationDate,
+                            isConfirmed: inputModul.emailConfirmation.isConfirmed,
+                        },
+                    },
+                },
+                include: {
+                    emailConfirmation: true, // Включаем данные подтверждения email
+                },
+            });
+
 
             return {
                 success: true,
@@ -40,5 +48,35 @@ export class AuthRepository {
 
         }
     }
+
+    // async findUserByConfirEmail(code: string): Promise<Result<User>> {
+    //     try {
+
+    //         const result = await this.prisma.user.findFirst({
+    //             where: {
+    //                 confirmationCode: code, // Фильтруем по confirmationCode
+    //             },
+    //         });
+
+    //         if (!result) {
+    //             throw new Error()
+    //         }
+
+    //         return {
+    //             success: true,
+    //             message: 'confirmation code is correct',
+    //             data: [result]
+    //         };
+
+    //     } catch (error) {
+
+    //         return {
+    //             success: false,
+    //             message: 'confirmation code is incorrect',
+    //             data: []
+    //         }
+
+    //     }
+    // }
 
 }
