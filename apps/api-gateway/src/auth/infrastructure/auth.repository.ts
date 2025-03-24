@@ -2,7 +2,7 @@ import { Injectable } from "@nestjs/common";
 import { EmailConfirmationWithUser, UserMapOutput, UserType } from "../type/auth.type";
 import { PrismaService } from "../../shared/prisma/prisma.service";
 import { Result } from "apps/api-gateway/generalTypes/errorResponseType";
-import { User } from "@prisma/client";
+import { DeviceSessions, User } from "@prisma/client";
 
 @Injectable()
 export class AuthRepository {
@@ -38,7 +38,7 @@ export class AuthRepository {
             }
 
         } catch (error) {
-
+            console.log(error)
             return {
                 success: false,
                 message: 'failed to create user in db',
@@ -72,7 +72,7 @@ export class AuthRepository {
             };
 
         } catch (error) {
-
+            console.log(error)
             return {
                 success: false,
                 message: 'confirmation code is incorrect',
@@ -135,6 +135,7 @@ export class AuthRepository {
                 data: [user],
             };
         } catch (error) {
+            console.log(error)
             return {
                 success: false,
                 message: 'An error occurred while searching for the user',
@@ -163,6 +164,7 @@ export class AuthRepository {
                 data: [user],
             };
         } catch (error) {
+            console.log(error)
             return {
                 success: false,
                 message: 'An error occurred while searching for the user',
@@ -171,4 +173,275 @@ export class AuthRepository {
         }
     }
 
+    async addSessionUser(inputModul: DeviceSessions): Promise<Result> {
+        try {
+            await this.prisma.deviceSessions.create({
+                data: {
+                    deviceId: inputModul.deviceId,
+                    ip: inputModul.ip,
+                    lastActiveDate: inputModul.lastActiveDate.toString(),
+                    title: inputModul.title,
+                    userId: inputModul.userId,
+                },
+            });
+
+            return {
+                success: true,
+                message: "session in the database recorded",
+                data: []
+            }
+
+        } catch (error) {
+            console.log(error)
+            return {
+                success: false,
+                message: "error writing to db session",
+                data: []
+            }
+
+        }
+    }
+
+    async findRottenSessions(userId: string, deviceId: string): Promise<Result<DeviceSessions>> {
+        try {
+            const session = await this.prisma.deviceSessions.findFirst({
+                where: {
+                    deviceId: deviceId,
+                    userId: userId,
+                },
+            });
+
+            if (!session) {
+                return {
+                    success: false,
+                    message: 'session not found',
+                    data: [],
+                };
+            }
+
+            return {
+                success: true,
+                message: 'there is a session',
+                data: [session]
+
+            };
+        } catch (error) {
+            console.log(error);
+            return {
+                success: false,
+                message: 'error searching for session in db',
+                data: []
+            };
+        }
+    }
+
+    async completelyRemoveSesion(deviceId: string, userId: string): Promise<Result> {
+        try {
+            await this.prisma.deviceSessions.delete({
+                where: {
+                    deviceId: deviceId,
+                    userId: userId,
+                },
+            });
+
+            return {
+                success: true,
+                data: [],
+                message: 'successful removal'
+            }
+
+        } catch (error) {
+            console.log(error, 'dfdfdfd')
+            return {
+                success: false,
+                data: [],
+                message: 'error while deleting'
+            }
+
+        }
+    }
+
+    async updateSesion(iat: string, userId: string, diveceId: string): Promise<Result> {
+
+        try {
+            await this.prisma.deviceSessions.update({
+                where: {
+                    deviceId: diveceId, // Ищем запись по старому deviceId
+                },
+                data: {
+                    lastActiveDate: iat, // Обновляем deviceId
+                },
+            });
+
+            return {
+                success: true,
+                message: 'successful update Session ',
+                data: []
+            }
+
+
+        } catch (error) {
+            return {
+                success: false,
+                message: 'error during update',
+                data: []
+            }
+
+        }
+
+    }
+
+    async findBlogOrEmail(userOrEmail: string): Promise<Result> {
+        try {
+            const user = await this.prisma.user.findFirst({
+                where: {
+                    OR: [
+                        { username: userOrEmail },
+                        { email: userOrEmail },
+                    ],
+                },
+                include: {
+                    emailConfirmation: true,
+                },
+            });
+
+            if (!user) {
+                throw new Error()
+            }
+
+
+            return {
+                success: true,
+                message: 'there is a user with such email',
+                data: [user]
+            }
+
+
+        } catch (error) {
+            console.error(error);
+            return {
+                success: false,
+                message: 'no such user by email',
+                data: []
+            }
+        }
+
+
+
+
+    }
+
+    async updateCodeUserByConfirEmail(userID: string, code: string): Promise<Result> {
+        try {
+            const result = await this.prisma.emailConfirmation.updateMany({
+                where: {
+                    userId: userID, // Фильтруем по userId
+                },
+                data: {
+                    confirmationCode: code, // Устанавливаем новое значение confirmationCode
+                },
+            });
+
+            if (result.count === 0) {
+                throw new Error()
+            }
+
+            return {
+                success: true,
+                message: 'successful setting of new confirmationCode value',
+                data: []
+
+            }
+        } catch (error) {
+
+            return {
+                success: false,
+                message: 'error about update',
+                data: []
+            }
+
+        }
+
+
+    }
+
+    async postPasswordRecoveryCode(code: string, email: string): Promise<Result> {
+        try {
+            await this.prisma.recoveryPassword.create({
+                data: {
+                    code: code,
+                    email: email,
+                },
+            });
+
+            return {
+                success: true,
+                message: 'successful creation',
+                data: []
+            }
+        } catch (error) {
+
+            return {
+                success: false,
+                data: [],
+                message: 'error creating',
+
+            }
+        }
+
+
+    }
+    
+    async checkPasswordRecoveryCode(code: string): Promise<Result> {
+        try {
+            const result = await this.prisma.recoveryPassword.findFirst({
+                where: { code: code }
+            });
+
+            return {
+                success: true,
+                message: '',
+                data: [result]
+            };
+        } catch (error) {
+            console.error('Error finding recovery password record:', error);
+            return {
+                success: false,
+                message: '',
+                data: []
+            };
+        }
+    }
+
+    async updatePassword(email: string, newPasswordHash: string) {
+        try {
+            const result = await this.prisma.user.updateMany({
+                where: { email: email }, 
+                data: {
+                    passwordHash: newPasswordHash, 
+                },
+            });
+    
+            if (result.count > 0) {
+                return {
+                    success: true,
+                    message: 'Password updated successfully',
+                    data: [result], 
+                };
+            } else {
+                return {
+                    success: false,
+                    message: 'User not found',
+                    data: [], 
+                };
+            }
+        } catch (error) {
+            console.error('Error updating password:', error);
+            return {
+                success: false,
+                message: 'Failed to update password',
+                data: [],
+            };
+        }
+    }
 }

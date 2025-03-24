@@ -39,3 +39,8 @@ export type EmailConfirmationWithUser = {
         updatedAt: Date;
     };
 };
+
+export type TokensType = {
+    accessToken: string,
+    refreshToken: string,
+}
