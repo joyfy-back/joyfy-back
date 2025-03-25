@@ -1,0 +1,12 @@
+# Игнорировать директории
+node_modules/
+dist/
+build/
+
+# Игнорировать файлы с определенным расширением
+*.min.js
+*.map
+*.bundle.js
+
+# Игнорировать отдельные файлы
+src/someFileToIgnore.js
