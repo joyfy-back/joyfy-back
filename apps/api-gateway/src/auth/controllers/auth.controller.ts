@@ -8,21 +8,13 @@ import {
   Request,
   Res,
 } from '@nestjs/common';
-import { UserCreateInputModule } from '../modules/input/user.create.module';
 import { Response } from 'express';
-import { CreateUserCommand } from '../application/use-case/create.user.case';
 import { CommandBus } from '@nestjs/cqrs';
 import { TokensType } from '../type/auth.type';
 import { Result } from 'apps/api-gateway/generalTypes/errorResponseType';
-import { EmailService } from '../application/emai.service';
+import { EmailService } from '../application/email.service';
 import { AuthService } from '../application/auth.service';
-import { UserLoginInputModule } from '../modules/input/user.login.module';
-import { LoginUserCommand } from '../application/use-case/login.user.case';
-import { DeleteSeissionCommand } from '../application/use-case/delete.session.case';
-import { EmailInputModele } from '../modules/input/email.user.module';
-import { PasswordRecoveryCommand } from '../application/use-case/password.recovery.case';
-import { NewPasswordInputModele } from '../modules/input/new.password.module';
-import { UpdatePasswordCommand } from '../application/use-case/update.password.case';
+
 import {
   ApiBearerAuth,
   ApiBody,
@@ -30,28 +22,41 @@ import {
   ApiResponse,
 } from '@nestjs/swagger';
 
+/* Commands */
+import { LoginUserCommand } from '../application/use-cases/login-user.use-case';
+import { CreateUserCommand } from '../application/use-cases/create-user.use-case';
+import { DeleteSessionCommand } from '../application/use-cases/delete-session.use-case';
+import { UpdatePasswordCommand } from '../application/use-cases/update-password.use-case';
+import { PasswordRecoveryCommand } from '../application/use-cases/password-recovery.use-case';
+
+/* DTO's */
+import { EmailInputDto } from '../dto/input-dto/user-email.dto';
+import { UserLoginInputDto } from '../dto/input-dto/user-login.dto';
+import { UserCreateInputDto } from '../dto/input-dto/user-create.dto';
+import { NewPasswordInputDto } from '../dto/input-dto/new-password.dto';
+
 @Controller('auth')
 export class AuthController {
   constructor(
     protected commandBuse: CommandBus,
     protected authService: AuthService,
-    protected emaiService: EmailService,
+    protected emailService: EmailService,
   ) {}
 
   @Post('registration')
   @HttpCode(201)
   @ApiOperation({ summary: 'Register a new user' })
-  @ApiBody({ type: UserCreateInputModule })
+  @ApiBody({ type: UserCreateInputDto })
   @ApiResponse({ status: 201, description: 'User registered successfully.' })
   @ApiResponse({ status: 400, description: 'Bad request.' })
-  async registerUser(@Body() inputModul: UserCreateInputModule) {
+  async registerUser(@Body() dto: UserCreateInputDto) {
     const user: Result = await this.commandBuse.execute(
       new CreateUserCommand(
-        inputModul.username,
-        inputModul.email,
-        inputModul.password,
-        inputModul.passwordConfirmation,
-        inputModul.agreeToTerms,
+        dto.username,
+        dto.email,
+        dto.password,
+        dto.passwordConfirmation,
+        dto.agreeToTerms,
       ),
     );
 
@@ -63,7 +68,7 @@ export class AuthController {
     }
 
     return {
-      message: `We have sent a link to confirm your email to ${inputModul.email}`,
+      message: `We have sent a link to confirm your email to ${dto.email}`,
     };
   }
 
@@ -83,7 +88,7 @@ export class AuthController {
   @ApiResponse({ status: 204, description: 'Email confirmed successfully.' })
   @ApiResponse({ status: 400, description: 'Bad request.' })
   async registrationConfirmation(@Body('code') code: string) {
-    const user = await this.emaiService.confirmEmail(code);
+    const user = await this.emailService.confirmEmail(code);
     if (!user.success) {
       throw new HttpException(
         {
@@ -97,20 +102,20 @@ export class AuthController {
   @Post('login')
   @HttpCode(200)
   @ApiOperation({ summary: 'User login' })
-  @ApiBody({ type: UserLoginInputModule })
+  @ApiBody({ type: UserLoginInputDto })
   @ApiResponse({ status: 200, description: 'User logged in successfully.' })
   @ApiResponse({ status: 401, description: 'Unauthorized.' })
   async login(
-    @Body() inputModul: UserLoginInputModule,
+    @Body() dto: UserLoginInputDto,
     @Res() res: Response,
     @Request() req,
   ) {
-    const checkCreadentlais = await this.authService.checkCreadentlais(
-      inputModul.Email,
-      inputModul.Password,
+    const checkCredentials = await this.authService.checkCredentials(
+      dto.Email,
+      dto.Password,
     );
 
-    if (!checkCreadentlais.success) {
+    if (!checkCredentials.success) {
       throw new HttpException('UNAUTHORIZED', HttpStatus.UNAUTHORIZED);
     }
 
@@ -118,8 +123,8 @@ export class AuthController {
 
     const tokens: Result<TokensType> = await this.commandBuse.execute(
       new LoginUserCommand(
-        checkCreadentlais.data[0].userId,
-        checkCreadentlais.data[0].username,
+        checkCredentials.data[0].userId,
+        checkCredentials.data[0].username,
         userAgent,
         req.ip,
       ),
@@ -155,7 +160,7 @@ export class AuthController {
     }
 
     await this.commandBuse.execute(
-      new DeleteSeissionCommand(result.data[0].userId, result.data[0].deviceId),
+      new DeleteSessionCommand(result.data[0].userId, result.data[0].deviceId),
     );
   }
 
@@ -202,11 +207,8 @@ export class AuthController {
   })
   @ApiResponse({ status: 204, description: 'Email sent successfully.' })
   @ApiResponse({ status: 400, description: 'Bad request.' })
-  async registrationEmailResending(
-    @Body('email') email: string,
-    @Request() req,
-  ) {
-    const res = await this.emaiService.resendingCode(email);
+  async registrationEmailResending(@Body('email') email: string) {
+    const res = await this.emailService.resendingCode(email);
 
     if (!res.success) {
       throw new HttpException(
@@ -221,14 +223,15 @@ export class AuthController {
   @Post('password-recovery')
   @HttpCode(204)
   @ApiOperation({ summary: 'Recover user password' })
-  @ApiBody({ type: EmailInputModele })
+  @ApiBody({ type: EmailInputDto })
   @ApiResponse({
     status: 204,
     description: 'Password recovery email sent successfully.',
   })
   @ApiResponse({ status: 400, description: 'Bad request.' })
-  async passwordRecovery(@Body() emailInputModul: EmailInputModele) {
-    const { email } = emailInputModul;
+  async passwordRecovery(@Body() dto: EmailInputDto) {
+    const { email } = dto;
+
     const result = await this.commandBuse.execute(
       new PasswordRecoveryCommand(email),
     );
@@ -241,12 +244,12 @@ export class AuthController {
   @Post('new-password')
   @HttpCode(204)
   @ApiOperation({ summary: 'Set new password' })
-  @ApiBody({ type: NewPasswordInputModele })
+  @ApiBody({ type: NewPasswordInputDto })
   @ApiResponse({ status: 204, description: 'Password updated successfully.' })
   @ApiResponse({ status: 404, description: 'User not found.' })
-  async newPassword(@Body() inputNewData: NewPasswordInputModele) {
+  async newPassword(@Body() dto: NewPasswordInputDto) {
     const result = await this.authService.checkPasswordRecovery(
-      inputNewData.recoveryCode,
+      dto.recoveryCode,
     );
 
     if (!result.success) {
@@ -254,7 +257,7 @@ export class AuthController {
     }
 
     await this.commandBuse.execute(
-      new UpdatePasswordCommand(result.data[0].email, inputNewData.newPassword),
+      new UpdatePasswordCommand(result.data[0].email, dto.newPassword),
     );
   }
 }

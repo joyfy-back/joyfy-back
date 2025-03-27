@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import {
   registerDecorator,
-  ValidationArguments,
   ValidationOptions,
   ValidatorConstraint,
   ValidatorConstraintInterface,
@@ -10,17 +9,13 @@ import { AuthRepository } from '../../infrastructure/auth.repository';
 
 @ValidatorConstraint({ name: 'UserNameIsExist', async: true })
 @Injectable()
-export class UserNameIsExistContsraint implements ValidatorConstraintInterface {
+export class UserNameIsExistConstraint implements ValidatorConstraintInterface {
   constructor(protected authRepository: AuthRepository) {}
 
-  async validate(value: any, validationArguments: ValidationArguments) {
-    const UserNameIsExist = await this.authRepository.findIsUserName(value);
+  async validate(value: string) {
+    const { success } = await this.authRepository.findIsUserName(value);
 
-    if (!UserNameIsExist.success) {
-      return true;
-    } else {
-      return false;
-    }
+    return !success;
   }
 }
 
@@ -34,7 +29,7 @@ export function UserNameIsExist(
       propertyName: propertyName,
       constraints: [property],
       options: validationOptions,
-      validator: UserNameIsExistContsraint,
+      validator: UserNameIsExistConstraint,
     });
   };
 }

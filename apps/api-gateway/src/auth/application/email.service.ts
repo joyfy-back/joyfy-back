@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import * as nodemailer from 'nodemailer';
+import { createTransport } from 'nodemailer';
 import { AuthRepository } from '../infrastructure/auth.repository';
 import { Result } from 'apps/api-gateway/generalTypes/errorResponseType';
 import { randomUUID } from 'crypto';
@@ -10,9 +10,9 @@ export class EmailService {
   async sendEmail(
     userCode: string,
     email: string,
-    recoverePasswordCode?: string,
+    recoveryPasswordCode?: string,
   ) {
-    const transporter = nodemailer.createTransport({
+    const transporter = createTransport({
       service: 'gmail',
       auth: {
         user: 'testestuser22@gmail.com',
@@ -100,8 +100,8 @@ export class EmailService {
           </html>
         `;
 
-    if (recoverePasswordCode) {
-      const info = await transporter.sendMail({
+    if (recoveryPasswordCode) {
+      return transporter.sendMail({
         from: 'Joyfy <no-reply@joyfy.online>', // sender address
         to: email, // list of receivers
         subject: 'Password Recovery', // Subject line
@@ -109,14 +109,12 @@ export class EmailService {
           'Password Recovery',
           'To finish password recovery, please click the button below:',
           'Recover Password',
-          `https://joyfy.online/auth/password-recovery?recoveryCode=${recoverePasswordCode}`,
+          `https://joyfy.online/auth/password-recovery?recoveryCode=${recoveryPasswordCode}`,
         ),
       });
-
-      return info;
     }
 
-    const info = await transporter.sendMail({
+    return transporter.sendMail({
       from: 'Joyfy <no-reply@joyfy.online>', // sender address
       to: email, // list of receivers
       subject: 'Complete Registration', // Subject line
@@ -127,14 +125,12 @@ export class EmailService {
         `https://joyfy.online/auth/email-confirmed?code=${userCode}`,
       ),
     });
-
-    return info;
   }
 
   async confirmEmail(code: string): Promise<Result> {
     // Step 1: Find email confirmation by code
     const emailConfirmationResult =
-      await this.authRepository.findUserByConfirEmail(code);
+      await this.authRepository.findUserByConfirmEmail(code);
 
     // If confirmation is not found or already confirmed, return an error
     if (
@@ -185,7 +181,7 @@ export class EmailService {
     };
   }
 
-  async resendingCode(email: string): Promise<Result> {
+  async resendCode(email: string): Promise<Result> {
     try {
       const user = await this.authRepository.findBlogOrEmail(email);
 
@@ -206,7 +202,7 @@ export class EmailService {
       }
 
       const newCode = randomUUID();
-      const result = await this.authRepository.updateCodeUserByConfirEmail(
+      const result = await this.authRepository.updateCodeUserByConfirmEmail(
         user.data[0].userId,
         newCode,
       );
@@ -219,7 +215,7 @@ export class EmailService {
         };
       }
 
-      this.sendEmail(newCode, email);
+      void this.sendEmail(newCode, email);
 
       return {
         success: true,

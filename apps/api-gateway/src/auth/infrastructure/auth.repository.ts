@@ -1,30 +1,27 @@
 import { Injectable } from '@nestjs/common';
-import {
-  EmailConfirmationWithUser,
-  UserMapOutput,
-  UserType,
-} from '../type/auth.type';
-import { PrismaService } from '../../shared/prisma/prisma.service';
-import { Result } from 'apps/api-gateway/generalTypes/errorResponseType';
+import { Result } from '@libs/shared/types';
 import { DeviceSessions, User } from '@prisma/client';
+import { EmailConfirmationWithUser, UserType } from '../type/auth.type';
+import { PrismaService } from '../../shared/prisma/prisma.service';
+import { formatErrorMessage } from '../../shared/libs/format-error-message';
 
 @Injectable()
 export class AuthRepository {
   constructor(protected prisma: PrismaService) {}
 
-  async createUser(inputModul: UserType): Promise<Result> {
+  async createUser(dto: UserType): Promise<Result<User>> {
     try {
       const user = await this.prisma.user.create({
         data: {
-          username: inputModul.username,
-          email: inputModul.email,
-          passwordHash: inputModul.passwordHash,
-          agreeToTerms: inputModul.agreeToTerms,
+          username: dto.username,
+          email: dto.email,
+          passwordHash: dto.passwordHash,
+          agreeToTerms: dto.agreeToTerms,
           emailConfirmation: {
             create: {
-              confirmationCode: inputModul.emailConfirmation.confirmationCode,
-              expirationDate: inputModul.emailConfirmation.expirationDate,
-              isConfirmed: inputModul.emailConfirmation.isConfirmed,
+              confirmationCode: dto.emailConfirmation.confirmationCode,
+              expirationDate: dto.emailConfirmation.expirationDate,
+              isConfirmed: dto.emailConfirmation.isConfirmed,
             },
           },
         },
@@ -48,7 +45,7 @@ export class AuthRepository {
     }
   }
 
-  async findUserByConfirEmail(
+  async findUserByConfirmEmail(
     code: string,
   ): Promise<Result<EmailConfirmationWithUser>> {
     try {
@@ -80,7 +77,7 @@ export class AuthRepository {
     }
   }
 
-  async updateConfirmation(userId: string): Promise<Result> {
+  async updateConfirmation(userId: string): Promise<Result<never>> {
     try {
       const result = await this.prisma.emailConfirmation.updateMany({
         where: {
@@ -101,9 +98,11 @@ export class AuthRepository {
         data: [],
       };
     } catch (error) {
+      const message = 'Mail is not confirmed';
+
       return {
         success: false,
-        message: 'mail not confirmed',
+        message: formatErrorMessage(error, message),
         data: [],
       };
     }
@@ -167,7 +166,7 @@ export class AuthRepository {
     }
   }
 
-  async addSessionUser(inputModul: DeviceSessions): Promise<Result> {
+  async addSessionUser(inputModul: DeviceSessions): Promise<Result<never>> {
     try {
       await this.prisma.deviceSessions.create({
         data: {
@@ -229,10 +228,10 @@ export class AuthRepository {
     }
   }
 
-  async completelyRemoveSesion(
+  async completelyRemoveSession(
     deviceId: string,
     userId: string,
-  ): Promise<Result> {
+  ): Promise<Result<never>> {
     try {
       await this.prisma.deviceSessions.delete({
         where: {
@@ -256,15 +255,15 @@ export class AuthRepository {
     }
   }
 
-  async updateSesion(
+  async updateSession(
     iat: string,
     userId: string,
-    diveceId: string,
-  ): Promise<Result> {
+    deviceId: string,
+  ): Promise<Result<never>> {
     try {
       await this.prisma.deviceSessions.update({
         where: {
-          deviceId: diveceId, // Ищем запись по старому deviceId
+          deviceId: deviceId, // Ищем запись по старому deviceId
         },
         data: {
           lastActiveDate: iat, // Обновляем deviceId
@@ -285,7 +284,7 @@ export class AuthRepository {
     }
   }
 
-  async findBlogOrEmail(userOrEmail: string): Promise<Result> {
+  async findBlogOrEmail(userOrEmail: string): Promise<Result<User>> {
     try {
       const user = await this.prisma.user.findFirst({
         where: {
@@ -315,7 +314,7 @@ export class AuthRepository {
     }
   }
 
-  async updateCodeUserByConfirEmail(
+  async updateCodeUserByConfirmEmail(
     userID: string,
     code: string,
   ): Promise<Result> {
@@ -347,7 +346,7 @@ export class AuthRepository {
     }
   }
 
-  async postPasswordRecoveryCode(code: string, email: string): Promise<Result> {
+  async postPasswordRecoveryCode(code: string, email: string): Promise<Result<never>> {
     try {
       await this.prisma.recoveryPassword.create({
         data: {
@@ -370,7 +369,7 @@ export class AuthRepository {
     }
   }
 
-  async checkPasswordRecoveryCode(code: string): Promise<Result> {
+  async checkPasswordRecoveryCode(code: string): Promise<Result<any>> {
     try {
       const result = await this.prisma.recoveryPassword.findFirst({
         where: { code: code },

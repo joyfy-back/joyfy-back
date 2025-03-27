@@ -1,20 +1,21 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { randomUUID } from 'crypto';
-import { UserCreateInputModule } from '../../modules/input/user.create.module';
 import { add } from 'date-fns';
-import * as argon2 from 'argon2';
+import { hash } from 'argon2';
+import { randomUUID } from 'crypto';
+import { EmailService } from '../email.service';
 import { UserMapOutput, UserType } from '../../type/auth.type';
-import { EmailService } from '../emai.service';
-import { Result } from 'apps/api-gateway/generalTypes/errorResponseType';
 import { AuthRepository } from '../../infrastructure/auth.repository';
+import { UserCreateInputDto } from '../../dto/input-dto/user-create.dto';
+import { formatErrorMessage } from '../../../shared/libs/format-error-message';
+import { Result } from '../../../../../../libs/shared/types';
 
 export class CreateUserCommand {
   constructor(
-    public username: string,
     public email: string,
+    public username: string,
     public password: string,
-    public passwordConfirmation: string,
     public agreeToTerms: boolean,
+    public passwordConfirmation: string,
   ) {}
 }
 
@@ -24,15 +25,13 @@ export class CreateUserUseCase implements ICommandHandler<CreateUserCommand> {
     protected emailService: EmailService,
     protected authRepository: AuthRepository,
   ) {}
-  async execute(
-    inputModul: UserCreateInputModule,
-  ): Promise<Result<UserMapOutput>> {
+  async execute(dto: UserCreateInputDto): Promise<Result<UserMapOutput>> {
     try {
-      const passwordHash = await argon2.hash(inputModul.password);
+      const passwordHash = await hash(dto.password);
 
       const newUser: UserType = {
-        username: inputModul.username,
-        email: inputModul.email,
+        username: dto.username,
+        email: dto.email,
         passwordHash: passwordHash,
         emailConfirmation: {
           confirmationCode: randomUUID(),
@@ -43,7 +42,7 @@ export class CreateUserUseCase implements ICommandHandler<CreateUserCommand> {
           isConfirmed: false,
         },
 
-        agreeToTerms: inputModul.agreeToTerms,
+        agreeToTerms: dto.agreeToTerms,
       };
 
       const user: Result<UserMapOutput> =
@@ -53,7 +52,7 @@ export class CreateUserUseCase implements ICommandHandler<CreateUserCommand> {
         throw new Error();
       }
 
-      this.emailService.sendEmail(
+      void this.emailService.sendEmail(
         newUser.emailConfirmation.confirmationCode,
         newUser.email,
       );
@@ -63,10 +62,12 @@ export class CreateUserUseCase implements ICommandHandler<CreateUserCommand> {
         message: 'the user was created successfully',
         data: user.data,
       };
-    } catch (error) {
+    } catch (error: unknown) {
+      const message = 'An unexpected error occurred when creating a user';
+
       return {
         success: false,
-        message: 'an error occurred when creating a user',
+        message: formatErrorMessage(error, message),
         data: [],
       };
     }

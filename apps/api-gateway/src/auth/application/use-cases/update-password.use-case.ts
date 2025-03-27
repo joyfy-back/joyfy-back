@@ -1,9 +1,10 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { UserCreateInputModule } from '../../modules/input/user.create.module';
-import * as argon2 from 'argon2';
+import { hash } from 'argon2';
 import { UserMapOutput } from '../../type/auth.type';
-import { Result } from 'apps/api-gateway/generalTypes/errorResponseType';
 import { AuthRepository } from '../../infrastructure/auth.repository';
+import { UserCreateInputDto } from '../../dto/input-dto/user-create.dto';
+import { formatErrorMessage } from '../../../shared/libs/format-error-message';
+import { Result } from '../../../../../../libs/shared/types';
 
 export class UpdatePasswordCommand {
   constructor(
@@ -17,14 +18,12 @@ export class UpdatePasswordUseCase
   implements ICommandHandler<UpdatePasswordCommand>
 {
   constructor(protected authRepository: AuthRepository) {}
-  async execute(
-    inputModul: UserCreateInputModule,
-  ): Promise<Result<UserMapOutput>> {
+  async execute(dto: UserCreateInputDto): Promise<Result<UserMapOutput>> {
     try {
-      const passwordHash = await argon2.hash(inputModul.password);
+      const passwordHash = await hash(dto.password);
 
       const result = await this.authRepository.updatePassword(
-        inputModul.email,
+        dto.email,
         passwordHash,
       );
 
@@ -38,9 +37,10 @@ export class UpdatePasswordUseCase
         data: [],
       };
     } catch (error) {
+      const message = 'an error occurred when creating a user';
       return {
         success: false,
-        message: 'an error occurred when creating a user',
+        message: formatErrorMessage(error, message),
         data: [],
       };
     }
