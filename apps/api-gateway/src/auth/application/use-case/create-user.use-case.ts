@@ -1,12 +1,12 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { randomUUID } from 'crypto';
-import { UserCreateInputDto } from '../../modules/input/user-create.dto';
 import { add } from 'date-fns';
-import * as argon2 from 'argon2';
+import { hash } from 'argon2';
 import { UserMapOutput, UserType } from '../../type/auth.type';
 import { EmailService } from '../emai.service';
 import { Result } from 'apps/api-gateway/generalTypes/errorResponseType';
 import { AuthRepository } from '../../infrastructure/auth.repository';
+import { UserCreateInputDto } from '../../dto/input-dto/user-create.dto';
 
 export class CreateUserCommand {
   constructor(
@@ -24,13 +24,13 @@ export class CreateUserUseCase implements ICommandHandler<CreateUserCommand> {
     protected emailService: EmailService,
     protected authRepository: AuthRepository,
   ) {}
-  async execute(inputDto: UserCreateInputDto): Promise<Result<UserMapOutput>> {
+  async execute(dto: UserCreateInputDto): Promise<Result<UserMapOutput>> {
     try {
-      const passwordHash = await argon2.hash(inputDto.password);
+      const passwordHash = await hash(dto.password);
 
       const newUser: UserType = {
-        username: inputDto.username,
-        email: inputDto.email,
+        username: dto.username,
+        email: dto.email,
         passwordHash: passwordHash,
         emailConfirmation: {
           confirmationCode: randomUUID(),
@@ -41,7 +41,7 @@ export class CreateUserUseCase implements ICommandHandler<CreateUserCommand> {
           isConfirmed: false,
         },
 
-        agreeToTerms: inputDto.agreeToTerms,
+        agreeToTerms: dto.agreeToTerms,
       };
 
       const user: Result<UserMapOutput> =
@@ -61,10 +61,18 @@ export class CreateUserUseCase implements ICommandHandler<CreateUserCommand> {
         message: 'the user was created successfully',
         data: user.data,
       };
-    } catch (error) {
+    } catch (error: unknown) {
+      let message = 'An unexpected error occurred when creating a user';
+
+      if (error instanceof Error) {
+        message = error.message;
+      } else if (typeof error === 'string') {
+        message = error;
+      }
+
       return {
         success: false,
-        message: 'an error occurred when creating a user',
+        message: message,
         data: [],
       };
     }
