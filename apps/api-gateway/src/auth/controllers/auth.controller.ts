@@ -1,5 +1,3 @@
-import { Body, Controller, Get, HttpCode, HttpException, HttpStatus, Post, Req, Request, Res, UseGuards } from "@nestjs/common";
-import { UserCreateInputModule } from "../modules/input/user.create.module";
 import {
   Body,
   Controller,
@@ -11,20 +9,21 @@ import {
   Res,
 } from '@nestjs/common';
 import { Response } from 'express';
-import { CreateUserCommand } from "../application/use-case/create.user.case";
 import { CommandBus } from "@nestjs/cqrs";
 import { TokensType } from "../type/auth.type";
 import { Result } from "apps/api-gateway/generalTypes/errorResponseType";
-import { EmailService } from "../application/emai.service";
 import { AuthService } from "../application/auth.service";
-import { UserLoginInputModule } from "../modules/input/user.login.module";
-import { LoginUserCommand } from "../application/use-case/login.user.case";
-import { DeleteSeissionCommand } from "../application/use-case/delete.session.case";
-import { EmailInputModele } from "../modules/input/email.user.module";
-import { PasswordRecoveryCommand } from "../application/use-case/password.recovery.case";
-import { NewPasswordInputModele } from "../modules/input/new.password.module";
-import { UpdatePasswordCommand } from "../application/use-case/update.password.case";
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiResponse } from "@nestjs/swagger";
+import { UserCreateInputDto } from "../dto/input-dto/user-create.dto";
+import { UserLoginInputDto } from "../dto/input-dto/user-login.dto";
+import { DeleteSessionCommand } from "../application/use-cases/delete-session.use-case";
+import { EmailInputDto } from "../dto/input-dto/user-email.dto";
+import { NewPasswordInputDto } from "../dto/input-dto/new-password.dto";
+import { CreateUserCommand } from '../application/use-cases/create-user.use-case';
+import { EmailService } from '../application/email.service';
+import { LoginUserCommand } from '../application/use-cases/login-user.use-case';
+import { PasswordRecoveryCommand } from '../application/use-cases/password-recovery.use-case';
+import { UpdatePasswordCommand } from '../application/use-cases/update-password.use-case';
 
 
 
@@ -34,7 +33,7 @@ export class AuthController {
     protected commandBuse: CommandBus,
     protected authService: AuthService,
     protected emailService: EmailService,
-  ) {}
+  ) { }
 
   @Post('registration')
   @HttpCode(201)
@@ -48,8 +47,8 @@ export class AuthController {
         dto.username,
         dto.email,
         dto.password,
-        dto.passwordConfirmation,
         dto.agreeToTerms,
+        dto.passwordConfirmation,
       ),
     );
 
@@ -133,8 +132,8 @@ export class AuthController {
       maxAge: 30 * 24 * 60 * 60 * 1000, //30 day
     });
 
-        return res.json({ accessToken: tokens.data[0].accessToken });
-    }
+    return res.json({ accessToken: tokens.data[0].accessToken });
+  }
 
   @Post('logout')
   @HttpCode(204)
@@ -143,7 +142,7 @@ export class AuthController {
   @ApiResponse({ status: 204, description: 'User logged out successfully.' })
   @ApiResponse({ status: 401, description: 'Unauthorized.' })
   async logout(@Request() req) {
-    const result =
+    const result: any =
       await this.authService.checkValidateUserSessionByRefreshToken(
         req.cookies.refreshToken,
       );
@@ -201,7 +200,7 @@ export class AuthController {
   @ApiResponse({ status: 204, description: 'Email sent successfully.' })
   @ApiResponse({ status: 400, description: 'Bad request.' })
   async registrationEmailResending(@Body('email') email: string) {
-    const res = await this.emailService.resendingCode(email);
+    const res = await this.emailService.resendCode(email);
 
     if (!res.success) {
       throw new HttpException(

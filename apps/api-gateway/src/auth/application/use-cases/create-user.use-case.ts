@@ -45,7 +45,7 @@ export class CreateUserUseCase implements ICommandHandler<CreateUserCommand> {
         agreeToTerms: dto.agreeToTerms,
       };
 
-      const user: Result<UserMapOutput> =
+      const user: Result<any> =
         await this.authRepository.createUser(newUser);
 
       if (!user.success) {

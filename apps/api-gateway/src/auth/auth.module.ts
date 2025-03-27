@@ -5,7 +5,7 @@ import { AuthService } from './application/auth.service';
 import { CqrsModule } from '@nestjs/cqrs';
 import { UserNameIsExistConstraint } from './utility/decorators/user-name-is.exist.decorator';
 import { JwtModule } from '@nestjs/jwt';
-import { GithubStrategy } from './strategy/github.strategy';
+// import { GithubStrategy } from './strategy/github.strategy';
 import { EmailService } from './application/email.service';
 import { EmailIsExistConstraint } from './utility/decorators/email-is-exist.decorator';
 import { CreateUserUseCase } from './application/use-cases/create-user.use-case';
@@ -30,7 +30,7 @@ const useCaseAuth = [
   PasswordRecoveryUseCase,
   UpdatePasswordUseCase,
 ];
-const strategys = [GithubStrategy]
+// const strategys = [GithubStrategy]
 
 @Module({
   imports: [CqrsModule, JwtModule.register({
@@ -38,7 +38,7 @@ const strategys = [GithubStrategy]
     signOptions: { expiresIn: '5m' },
   }),],
   controllers: [AuthController],
-  providers: [...authProviders, ...useCaseAuth, ...strategys],
+  providers: [...authProviders, ...useCaseAuth],
   exports: [],
 })
 export class AuthModule {}

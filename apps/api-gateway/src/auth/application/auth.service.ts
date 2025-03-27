@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { User } from '@prisma/client';
-import { Result } from '@libs/shared/types';
 import { verify } from 'argon2';
 import { AuthRepository } from '../infrastructure/auth.repository';
 import { formatErrorMessage } from '../../shared/libs/format-error-message';
+import { Result } from 'libs/shared/types';
 
 @Injectable()
 export class AuthService {
@@ -45,7 +45,7 @@ export class AuthService {
 
   async checkValidateUserSessionByRefreshToken(
     refreshToken: string,
-  ): Promise<Result> {
+  ): Promise<Result<[]>> {
     try {
       const decodedToken = await this.jwtService.verify(refreshToken);
       const sessionResult = await this.authRepository.findRottenSessions(
@@ -96,7 +96,7 @@ export class AuthService {
     return tokens;
   }
 
-  async checkPasswordRecovery(code: string): Promise<Result> {
+  async checkPasswordRecovery(code: string): Promise<Result<any>> {
     try {
       const result = await this.authRepository.checkPasswordRecoveryCode(code);
 
