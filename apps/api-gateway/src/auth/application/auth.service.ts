@@ -1,9 +1,10 @@
 import { Injectable } from '@nestjs/common';
-import { AuthRepository } from '../infrastructure/auth.repository';
-import * as argon2 from 'argon2';
-import { Result } from 'apps/api-gateway/generalTypes/errorResponseType';
-import { User } from '@prisma/client';
 import { JwtService } from '@nestjs/jwt';
+import { User } from '@prisma/client';
+import { verify } from 'argon2';
+import { AuthRepository } from '../infrastructure/auth.repository';
+import { formatErrorMessage } from '../../shared/libs/format-error-message';
+import { Result } from 'apps/api-gateway/generalTypes/errorResponseType';
 
 @Injectable()
 export class AuthService {
@@ -25,10 +26,7 @@ export class AuthService {
       };
     }
 
-    const isPasswordValid = await argon2.verify(
-      user.data[0].passwordHash,
-      password,
-    );
+    const isPasswordValid = await verify(user.data[0].passwordHash, password);
 
     if (!isPasswordValid) {
       return {
@@ -68,9 +66,10 @@ export class AuthService {
         data: [decodedToken],
       };
     } catch (error) {
+      const message = 'Invalid session or token';
       return {
         success: false,
-        message: 'Invalid session or token',
+        message: formatErrorMessage(error, message),
         data: [],
       };
     }

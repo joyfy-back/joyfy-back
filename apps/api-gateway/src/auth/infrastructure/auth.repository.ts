@@ -3,6 +3,7 @@ import { EmailConfirmationWithUser, UserType } from '../type/auth.type';
 import { PrismaService } from '../../shared/prisma/prisma.service';
 import { Result } from 'apps/api-gateway/generalTypes/errorResponseType';
 import { DeviceSessions, User } from '@prisma/client';
+import { formatErrorMessage } from '../../shared/libs/format-error-message';
 
 @Injectable()
 export class AuthRepository {
@@ -44,7 +45,7 @@ export class AuthRepository {
     }
   }
 
-  async findUserByConfirEmail(
+  async findUserByConfirmEmail(
     code: string,
   ): Promise<Result<EmailConfirmationWithUser>> {
     try {
@@ -97,9 +98,11 @@ export class AuthRepository {
         data: [],
       };
     } catch (error) {
+      const message = 'Mail is not confirmed';
+
       return {
         success: false,
-        message: 'mail not confirmed',
+        message: formatErrorMessage(error, message),
         data: [],
       };
     }

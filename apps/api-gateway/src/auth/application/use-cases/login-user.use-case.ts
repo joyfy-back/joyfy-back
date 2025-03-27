@@ -1,11 +1,11 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { EmailService } from '../emai.service';
-import { AuthRepository } from '../../infrastructure/auth.repository';
-import { v4 as uuidv4 } from 'uuid';
 import { JwtService } from '@nestjs/jwt';
+import { v4 as uuidv4 } from 'uuid';
 import { DeviceSessions } from '@prisma/client';
-import { Result } from 'apps/api-gateway/generalTypes/errorResponseType';
+import { AuthRepository } from '../../infrastructure/auth.repository';
 import { TokensType } from '../../type/auth.type';
+import { formatErrorMessage } from '../../../shared/libs/format-error-message';
+import { Result } from '../../../../../../libs/shared/types';
 
 export class LoginUserCommand {
   constructor(
@@ -22,13 +22,13 @@ export class LoginUserUseCase implements ICommandHandler<LoginUserCommand> {
     protected authRepository: AuthRepository,
     protected jwtService: JwtService,
   ) {}
-  async execute(inputModul: LoginUserCommand): Promise<Result<TokensType>> {
+  async execute(dto: LoginUserCommand): Promise<Result<TokensType>> {
     try {
       const deviceId = uuidv4();
 
       const payload = {
-        userName: inputModul.userName,
-        userId: inputModul.userId,
+        userName: dto.userName,
+        userId: dto.userId,
         deviceId: deviceId,
       };
 
@@ -39,10 +39,10 @@ export class LoginUserUseCase implements ICommandHandler<LoginUserCommand> {
 
       const deviceSession: DeviceSessions = {
         deviceId: deviceId,
-        userId: inputModul.userId,
+        userId: dto.userId,
         lastActiveDate: this.jwtService.decode(tokens.refreshToken).iat,
-        ip: inputModul.ip,
-        title: inputModul.userAgent,
+        ip: dto.ip,
+        title: dto.userAgent,
       };
 
       const result = await this.authRepository.addSessionUser(deviceSession);
@@ -57,9 +57,11 @@ export class LoginUserUseCase implements ICommandHandler<LoginUserCommand> {
         data: [tokens],
       };
     } catch (error) {
+      const message = 'Error writing to db session';
+
       return {
         success: false,
-        message: 'error writing to db session',
+        message: formatErrorMessage(error, message),
         data: [],
       };
     }

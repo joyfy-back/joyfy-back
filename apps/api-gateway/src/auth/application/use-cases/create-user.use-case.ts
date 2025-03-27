@@ -1,20 +1,21 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { randomUUID } from 'crypto';
 import { add } from 'date-fns';
 import { hash } from 'argon2';
+import { randomUUID } from 'crypto';
+import { EmailService } from '../email.service';
 import { UserMapOutput, UserType } from '../../type/auth.type';
-import { EmailService } from '../emai.service';
-import { Result } from 'apps/api-gateway/generalTypes/errorResponseType';
 import { AuthRepository } from '../../infrastructure/auth.repository';
 import { UserCreateInputDto } from '../../dto/input-dto/user-create.dto';
+import { formatErrorMessage } from '../../../shared/libs/format-error-message';
+import { Result } from '../../../../../../libs/shared/types';
 
 export class CreateUserCommand {
   constructor(
-    public username: string,
     public email: string,
+    public username: string,
     public password: string,
-    public passwordConfirmation: string,
     public agreeToTerms: boolean,
+    public passwordConfirmation: string,
   ) {}
 }
 
@@ -62,17 +63,11 @@ export class CreateUserUseCase implements ICommandHandler<CreateUserCommand> {
         data: user.data,
       };
     } catch (error: unknown) {
-      let message = 'An unexpected error occurred when creating a user';
-
-      if (error instanceof Error) {
-        message = error.message;
-      } else if (typeof error === 'string') {
-        message = error;
-      }
+      const message = 'An unexpected error occurred when creating a user';
 
       return {
         success: false,
-        message: message,
+        message: formatErrorMessage(error, message),
         data: [],
       };
     }

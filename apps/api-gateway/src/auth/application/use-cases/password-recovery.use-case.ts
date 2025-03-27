@@ -1,9 +1,10 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { randomUUID } from 'crypto';
-import { EmailService } from '../emai.service';
+import { EmailService } from '../email.service';
 import { Result } from 'apps/api-gateway/generalTypes/errorResponseType';
 import { AuthRepository } from '../../infrastructure/auth.repository';
 import { EmailInputDto } from '../../dto/input-dto/user-email.dto';
+import { formatErrorMessage } from '../../../shared/libs/format-error-message';
 
 export class PasswordRecoveryCommand {
   constructor(public email: string) {}
@@ -29,11 +30,8 @@ export class PasswordRecoveryUseCase
       if (!result.success) {
         throw new Error();
       }
-      this.emailService.sendEmail(
-        'null',
-        dto.email,
-        passwordRecoveryCode,
-      );
+
+      void this.emailService.sendEmail('null', dto.email, passwordRecoveryCode);
 
       return {
         success: true,
@@ -41,9 +39,11 @@ export class PasswordRecoveryUseCase
         data: [],
       };
     } catch (error) {
+      const message = 'error creating duplicate password';
+
       return {
         success: false,
-        message: 'error creating duplicate password',
+        message: formatErrorMessage(error, message),
         data: [],
       };
     }
