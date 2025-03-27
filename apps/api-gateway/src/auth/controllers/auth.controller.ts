@@ -1,3 +1,5 @@
+import { Body, Controller, Get, HttpCode, HttpException, HttpStatus, Post, Req, Request, Res, UseGuards } from "@nestjs/common";
+import { UserCreateInputModule } from "../modules/input/user.create.module";
 import {
   Body,
   Controller,
@@ -9,31 +11,22 @@ import {
   Res,
 } from '@nestjs/common';
 import { Response } from 'express';
-import { CommandBus } from '@nestjs/cqrs';
-import { TokensType } from '../type/auth.type';
-import { Result } from 'apps/api-gateway/generalTypes/errorResponseType';
-import { EmailService } from '../application/email.service';
-import { AuthService } from '../application/auth.service';
+import { CreateUserCommand } from "../application/use-case/create.user.case";
+import { CommandBus } from "@nestjs/cqrs";
+import { TokensType } from "../type/auth.type";
+import { Result } from "apps/api-gateway/generalTypes/errorResponseType";
+import { EmailService } from "../application/emai.service";
+import { AuthService } from "../application/auth.service";
+import { UserLoginInputModule } from "../modules/input/user.login.module";
+import { LoginUserCommand } from "../application/use-case/login.user.case";
+import { DeleteSeissionCommand } from "../application/use-case/delete.session.case";
+import { EmailInputModele } from "../modules/input/email.user.module";
+import { PasswordRecoveryCommand } from "../application/use-case/password.recovery.case";
+import { NewPasswordInputModele } from "../modules/input/new.password.module";
+import { UpdatePasswordCommand } from "../application/use-case/update.password.case";
+import { ApiBearerAuth, ApiBody, ApiOperation, ApiResponse } from "@nestjs/swagger";
 
-import {
-  ApiBearerAuth,
-  ApiBody,
-  ApiOperation,
-  ApiResponse,
-} from '@nestjs/swagger';
 
-/* Commands */
-import { LoginUserCommand } from '../application/use-cases/login-user.use-case';
-import { CreateUserCommand } from '../application/use-cases/create-user.use-case';
-import { DeleteSessionCommand } from '../application/use-cases/delete-session.use-case';
-import { UpdatePasswordCommand } from '../application/use-cases/update-password.use-case';
-import { PasswordRecoveryCommand } from '../application/use-cases/password-recovery.use-case';
-
-/* DTO's */
-import { EmailInputDto } from '../dto/input-dto/user-email.dto';
-import { UserLoginInputDto } from '../dto/input-dto/user-login.dto';
-import { UserCreateInputDto } from '../dto/input-dto/user-create.dto';
-import { NewPasswordInputDto } from '../dto/input-dto/new-password.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -140,8 +133,8 @@ export class AuthController {
       maxAge: 30 * 24 * 60 * 60 * 1000, //30 day
     });
 
-    return res.json({ accessToken: tokens.data[0].accessToken });
-  }
+        return res.json({ accessToken: tokens.data[0].accessToken });
+    }
 
   @Post('logout')
   @HttpCode(204)

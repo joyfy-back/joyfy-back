@@ -2,42 +2,43 @@ import { Module, Provider } from '@nestjs/common';
 import { AuthController } from './controllers/auth.controller';
 import { AuthRepository } from './infrastructure/auth.repository';
 import { AuthService } from './application/auth.service';
-import { EmailService } from './application/emai.service';
-import { CreateUserUseCase } from './application/use-case/create.user.case';
 import { CqrsModule } from '@nestjs/cqrs';
-import { EmailIsExistContsraint } from './utility/decorators/email-Is-exist.decorator';
-import { UserNameIsExistContsraint } from './utility/decorators/user-name-is.exist.decorator';
+import { UserNameIsExistConstraint } from './utility/decorators/user-name-is.exist.decorator';
 import { JwtModule } from '@nestjs/jwt';
-import { LoginUserUseCase } from './application/use-case/login.user.case';
-import { DeleteSeissionUseCase } from './application/use-case/delete.session.case';
-import { PasswordRecoveryUseCase } from './application/use-case/password.recovery.case';
-import { UpdatePasswordUseCase } from './application/use-case/update.password.case';
+import { GithubStrategy } from './strategy/github.strategy';
+import { EmailService } from './application/email.service';
+import { EmailIsExistConstraint } from './utility/decorators/email-is-exist.decorator';
+import { CreateUserUseCase } from './application/use-cases/create-user.use-case';
+import { DeleteSessionUseCase } from './application/use-cases/delete-session.use-case';
+import { LoginUserUseCase } from './application/use-cases/login-user.use-case';
+import { PasswordRecoveryUseCase } from './application/use-cases/password-recovery.use-case';
+import { UpdatePasswordUseCase } from './application/use-cases/update-password.use-case';
+
+
 
 const authProviders: Provider[] = [
   AuthRepository,
   AuthService,
   EmailService,
-  EmailIsExistContsraint,
-  UserNameIsExistContsraint,
+  EmailIsExistConstraint,
+  UserNameIsExistConstraint,
 ];
 const useCaseAuth = [
   CreateUserUseCase,
   LoginUserUseCase,
-  DeleteSeissionUseCase,
+  DeleteSessionUseCase,
   PasswordRecoveryUseCase,
   UpdatePasswordUseCase,
 ];
+const strategys = [GithubStrategy]
 
 @Module({
-  imports: [
-    CqrsModule,
-    JwtModule.register({
-      secret: 'your_secret_key',
-      signOptions: { expiresIn: '5m' },
-    }),
-  ],
+  imports: [CqrsModule, JwtModule.register({
+    secret: 'your_secret_key',
+    signOptions: { expiresIn: '5m' },
+  }),],
   controllers: [AuthController],
-  providers: [...authProviders, ...useCaseAuth],
+  providers: [...authProviders, ...useCaseAuth, ...strategys],
   exports: [],
 })
 export class AuthModule {}
