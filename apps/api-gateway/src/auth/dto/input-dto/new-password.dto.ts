@@ -2,7 +2,7 @@ import { IsString, Length } from 'class-validator';
 import { Trim } from '../../utility/decorators/trim';
 import { ApiProperty } from '@nestjs/swagger';
 
-export class NewPasswordInputModele {
+export class NewPasswordInputDto {
   @ApiProperty({ example: 'NewPassword123!', description: 'New password' })
   @Trim()
   @IsString()

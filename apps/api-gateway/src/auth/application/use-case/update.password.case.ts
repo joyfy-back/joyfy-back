@@ -1,6 +1,6 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { UserCreateInputDto } from '../../modules/input/user-create.dto';
-import * as argon2 from 'argon2';
+import { hash } from 'argon2';
 import { UserMapOutput } from '../../type/auth.type';
 import { Result } from 'apps/api-gateway/generalTypes/errorResponseType';
 import { AuthRepository } from '../../infrastructure/auth.repository';
@@ -19,7 +19,7 @@ export class UpdatePasswordUseCase
   constructor(protected authRepository: AuthRepository) {}
   async execute(inputDto: UserCreateInputDto): Promise<Result<UserMapOutput>> {
     try {
-      const passwordHash = await argon2.hash(inputDto.password);
+      const passwordHash = await hash(inputDto.password);
 
       const result = await this.authRepository.updatePassword(
         inputDto.email,

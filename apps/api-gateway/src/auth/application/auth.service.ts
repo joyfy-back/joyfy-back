@@ -12,7 +12,7 @@ export class AuthService {
     protected jwtService: JwtService,
   ) {}
 
-  async checkCreadentlais(
+  async checkCredentials(
     email: string,
     password: string,
   ): Promise<Result<User>> {

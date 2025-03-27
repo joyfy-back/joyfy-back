@@ -1,9 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import {
-  EmailConfirmationWithUser,
-  UserMapOutput,
-  UserType,
-} from '../type/auth.type';
+import { EmailConfirmationWithUser, UserType } from '../type/auth.type';
 import { PrismaService } from '../../shared/prisma/prisma.service';
 import { Result } from 'apps/api-gateway/generalTypes/errorResponseType';
 import { DeviceSessions, User } from '@prisma/client';
@@ -12,19 +8,19 @@ import { DeviceSessions, User } from '@prisma/client';
 export class AuthRepository {
   constructor(protected prisma: PrismaService) {}
 
-  async createUser(inputModul: UserType): Promise<Result> {
+  async createUser(dto: UserType): Promise<Result> {
     try {
       const user = await this.prisma.user.create({
         data: {
-          username: inputModul.username,
-          email: inputModul.email,
-          passwordHash: inputModul.passwordHash,
-          agreeToTerms: inputModul.agreeToTerms,
+          username: dto.username,
+          email: dto.email,
+          passwordHash: dto.passwordHash,
+          agreeToTerms: dto.agreeToTerms,
           emailConfirmation: {
             create: {
-              confirmationCode: inputModul.emailConfirmation.confirmationCode,
-              expirationDate: inputModul.emailConfirmation.expirationDate,
-              isConfirmed: inputModul.emailConfirmation.isConfirmed,
+              confirmationCode: dto.emailConfirmation.confirmationCode,
+              expirationDate: dto.emailConfirmation.expirationDate,
+              isConfirmed: dto.emailConfirmation.isConfirmed,
             },
           },
         },
@@ -259,12 +255,12 @@ export class AuthRepository {
   async updateSesion(
     iat: string,
     userId: string,
-    diveceId: string,
+    deviceId: string,
   ): Promise<Result> {
     try {
       await this.prisma.deviceSessions.update({
         where: {
-          deviceId: diveceId, // Ищем запись по старому deviceId
+          deviceId: deviceId, // Ищем запись по старому deviceId
         },
         data: {
           lastActiveDate: iat, // Обновляем deviceId

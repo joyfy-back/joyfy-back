@@ -3,7 +3,7 @@ import { randomUUID } from 'crypto';
 import { EmailService } from '../emai.service';
 import { Result } from 'apps/api-gateway/generalTypes/errorResponseType';
 import { AuthRepository } from '../../infrastructure/auth.repository';
-import { EmailInputModele } from '../../modules/input/email.user.module';
+import { EmailInputDto } from '../../dto/input-dto/user-email.dto';
 
 export class PasswordRecoveryCommand {
   constructor(public email: string) {}
@@ -17,13 +17,13 @@ export class PasswordRecoveryUseCase
     protected emailService: EmailService,
     protected authRepository: AuthRepository,
   ) {}
-  async execute(inputModul: EmailInputModele): Promise<Result> {
+  async execute(dto: EmailInputDto): Promise<Result> {
     try {
       const passwordRecoveryCode = randomUUID();
 
       const result = await this.authRepository.postPasswordRecoveryCode(
         passwordRecoveryCode,
-        inputModul.email,
+        dto.email,
       );
 
       if (!result.success) {
@@ -31,7 +31,7 @@ export class PasswordRecoveryUseCase
       }
       this.emailService.sendEmail(
         'null',
-        inputModul.email,
+        dto.email,
         passwordRecoveryCode,
       );
 

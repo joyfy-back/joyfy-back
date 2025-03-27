@@ -7,7 +7,7 @@ import {
   MinLength,
 } from 'class-validator';
 
-export class UserLoginInputModule {
+export class UserLoginInputDto {
   @ApiProperty({ example: 'john@example.com', description: 'User email' })
   @IsEmail({}, { message: 'Invalid email format' })
   Email: string;
