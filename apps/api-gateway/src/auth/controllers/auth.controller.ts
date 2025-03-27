@@ -12,7 +12,7 @@ import { Response } from 'express';
 import { CommandBus } from '@nestjs/cqrs';
 import { TokensType } from '../type/auth.type';
 import { Result } from 'apps/api-gateway/generalTypes/errorResponseType';
-import { EmailService } from '../application/emai.service';
+import { EmailService } from '../application/email.service';
 import { AuthService } from '../application/auth.service';
 
 import {
@@ -23,11 +23,11 @@ import {
 } from '@nestjs/swagger';
 
 /* Commands */
-import { LoginUserCommand } from '../application/use-case/login.user.case';
-import { CreateUserCommand } from '../application/use-case/create.user.case';
-import { DeleteSeissionCommand } from '../application/use-case/delete.session.case';
-import { UpdatePasswordCommand } from '../application/use-case/update.password.case';
-import { PasswordRecoveryCommand } from '../application/use-case/password.recovery.case';
+import { LoginUserCommand } from '../application/use-cases/login-user.use-case';
+import { CreateUserCommand } from '../application/use-cases/create-user.use-case';
+import { DeleteSessionCommand } from '../application/use-cases/delete-session.use-case';
+import { UpdatePasswordCommand } from '../application/use-cases/update-password.use-case';
+import { PasswordRecoveryCommand } from '../application/use-cases/password-recovery.use-case';
 
 /* DTO's */
 import { EmailInputDto } from '../dto/input-dto/user-email.dto';
@@ -160,7 +160,7 @@ export class AuthController {
     }
 
     await this.commandBuse.execute(
-      new DeleteSeissionCommand(result.data[0].userId, result.data[0].deviceId),
+      new DeleteSessionCommand(result.data[0].userId, result.data[0].deviceId),
     );
   }
 

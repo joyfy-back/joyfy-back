@@ -130,7 +130,7 @@ export class EmailService {
   async confirmEmail(code: string): Promise<Result> {
     // Step 1: Find email confirmation by code
     const emailConfirmationResult =
-      await this.authRepository.findUserByConfirEmail(code);
+      await this.authRepository.findUserByConfirmEmail(code);
 
     // If confirmation is not found or already confirmed, return an error
     if (
@@ -202,7 +202,7 @@ export class EmailService {
       }
 
       const newCode = randomUUID();
-      const result = await this.authRepository.updateCodeUserByConfirEmail(
+      const result = await this.authRepository.updateCodeUserByConfirmEmail(
         user.data[0].userId,
         newCode,
       );

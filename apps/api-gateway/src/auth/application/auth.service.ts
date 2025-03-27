@@ -87,7 +87,7 @@ export class AuthService {
       refreshToken: this.jwtService.sign(body, { expiresIn: '1h' }),
     };
 
-    await this.authRepository.updateSesion(
+    await this.authRepository.updateSession(
       this.jwtService.decode(tokens.refreshToken).iat,
       payload.userId,
       payload.deviceId,

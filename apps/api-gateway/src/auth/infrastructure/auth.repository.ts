@@ -228,7 +228,7 @@ export class AuthRepository {
     }
   }
 
-  async completelyRemoveSesion(
+  async completelyRemoveSession(
     deviceId: string,
     userId: string,
   ): Promise<Result> {
@@ -255,7 +255,7 @@ export class AuthRepository {
     }
   }
 
-  async updateSesion(
+  async updateSession(
     iat: string,
     userId: string,
     deviceId: string,
@@ -314,7 +314,7 @@ export class AuthRepository {
     }
   }
 
-  async updateCodeUserByConfirEmail(
+  async updateCodeUserByConfirmEmail(
     userID: string,
     code: string,
   ): Promise<Result> {

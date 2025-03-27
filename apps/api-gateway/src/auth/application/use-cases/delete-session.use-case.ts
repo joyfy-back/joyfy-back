@@ -21,7 +21,7 @@ export class DeleteSessionUseCase
   ) {}
   async execute(dto: DeleteSessionCommand): Promise<Result> {
     try {
-      const result = await this.authRepository.completelyRemoveSesion(
+      const result = await this.authRepository.completelyRemoveSession(
         dto.deviceId,
         dto.userId,
       );
