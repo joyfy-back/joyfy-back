@@ -1,15 +1,15 @@
 import { Injectable } from '@nestjs/common';
+import { Result } from '@libs/shared/types';
+import { DeviceSessions, User } from '@prisma/client';
 import { EmailConfirmationWithUser, UserType } from '../type/auth.type';
 import { PrismaService } from '../../shared/prisma/prisma.service';
-import { Result } from 'apps/api-gateway/generalTypes/errorResponseType';
-import { DeviceSessions, User } from '@prisma/client';
 import { formatErrorMessage } from '../../shared/libs/format-error-message';
 
 @Injectable()
 export class AuthRepository {
   constructor(protected prisma: PrismaService) {}
 
-  async createUser(dto: UserType): Promise<Result> {
+  async createUser(dto: UserType): Promise<Result<User>> {
     try {
       const user = await this.prisma.user.create({
         data: {
@@ -77,7 +77,7 @@ export class AuthRepository {
     }
   }
 
-  async updateConfirmation(userId: string): Promise<Result> {
+  async updateConfirmation(userId: string): Promise<Result<never>> {
     try {
       const result = await this.prisma.emailConfirmation.updateMany({
         where: {
@@ -166,7 +166,7 @@ export class AuthRepository {
     }
   }
 
-  async addSessionUser(inputModul: DeviceSessions): Promise<Result> {
+  async addSessionUser(inputModul: DeviceSessions): Promise<Result<never>> {
     try {
       await this.prisma.deviceSessions.create({
         data: {
@@ -231,7 +231,7 @@ export class AuthRepository {
   async completelyRemoveSession(
     deviceId: string,
     userId: string,
-  ): Promise<Result> {
+  ): Promise<Result<never>> {
     try {
       await this.prisma.deviceSessions.delete({
         where: {
@@ -259,7 +259,7 @@ export class AuthRepository {
     iat: string,
     userId: string,
     deviceId: string,
-  ): Promise<Result> {
+  ): Promise<Result<never>> {
     try {
       await this.prisma.deviceSessions.update({
         where: {
@@ -284,7 +284,7 @@ export class AuthRepository {
     }
   }
 
-  async findBlogOrEmail(userOrEmail: string): Promise<Result> {
+  async findBlogOrEmail(userOrEmail: string): Promise<Result<User>> {
     try {
       const user = await this.prisma.user.findFirst({
         where: {
@@ -346,7 +346,7 @@ export class AuthRepository {
     }
   }
 
-  async postPasswordRecoveryCode(code: string, email: string): Promise<Result> {
+  async postPasswordRecoveryCode(code: string, email: string): Promise<Result<never>> {
     try {
       await this.prisma.recoveryPassword.create({
         data: {
@@ -369,7 +369,7 @@ export class AuthRepository {
     }
   }
 
-  async checkPasswordRecoveryCode(code: string): Promise<Result> {
+  async checkPasswordRecoveryCode(code: string): Promise<Result<any>> {
     try {
       const result = await this.prisma.recoveryPassword.findFirst({
         where: { code: code },

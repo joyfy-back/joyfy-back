@@ -27,7 +27,7 @@ export class DeleteSessionUseCase
       );
 
       if (!result.success) {
-        throw new Error();
+        throw new Error('Failed to delete session');
       }
 
       return {

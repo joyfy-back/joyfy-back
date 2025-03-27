@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { User } from '@prisma/client';
+import { Result } from '@libs/shared/types';
 import { verify } from 'argon2';
 import { AuthRepository } from '../infrastructure/auth.repository';
 import { formatErrorMessage } from '../../shared/libs/format-error-message';
-import { Result } from 'apps/api-gateway/generalTypes/errorResponseType';
 
 @Injectable()
 export class AuthService {
