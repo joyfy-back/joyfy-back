@@ -1,6 +1,6 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { randomUUID } from 'crypto';
-import { UserCreateInputModule } from '../../modules/input/user.create.module';
+import { UserCreateInputDto } from '../../modules/input/user-create.dto';
 import { add } from 'date-fns';
 import * as argon2 from 'argon2';
 import { UserMapOutput, UserType } from '../../type/auth.type';
@@ -24,15 +24,13 @@ export class CreateUserUseCase implements ICommandHandler<CreateUserCommand> {
     protected emailService: EmailService,
     protected authRepository: AuthRepository,
   ) {}
-  async execute(
-    inputModul: UserCreateInputModule,
-  ): Promise<Result<UserMapOutput>> {
+  async execute(inputDto: UserCreateInputDto): Promise<Result<UserMapOutput>> {
     try {
-      const passwordHash = await argon2.hash(inputModul.password);
+      const passwordHash = await argon2.hash(inputDto.password);
 
       const newUser: UserType = {
-        username: inputModul.username,
-        email: inputModul.email,
+        username: inputDto.username,
+        email: inputDto.email,
         passwordHash: passwordHash,
         emailConfirmation: {
           confirmationCode: randomUUID(),
@@ -43,7 +41,7 @@ export class CreateUserUseCase implements ICommandHandler<CreateUserCommand> {
           isConfirmed: false,
         },
 
-        agreeToTerms: inputModul.agreeToTerms,
+        agreeToTerms: inputDto.agreeToTerms,
       };
 
       const user: Result<UserMapOutput> =
@@ -53,7 +51,7 @@ export class CreateUserUseCase implements ICommandHandler<CreateUserCommand> {
         throw new Error();
       }
 
-      this.emailService.sendEmail(
+      void this.emailService.sendEmail(
         newUser.emailConfirmation.confirmationCode,
         newUser.email,
       );

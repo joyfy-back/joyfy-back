@@ -10,7 +10,7 @@ import {
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
-export class UserCreateInputModule {
+export class UserCreateInputDto {
   @ApiProperty({ example: 'john_doe', description: 'Username' })
   @IsString()
   @MinLength(6, { message: 'Username must be at least 6 characters long' })

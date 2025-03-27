@@ -8,7 +8,7 @@ import {
   Request,
   Res,
 } from '@nestjs/common';
-import { UserCreateInputModule } from '../modules/input/user.create.module';
+import { UserCreateInputDto } from '../modules/input/user-create.dto';
 import { Response } from 'express';
 import { CreateUserCommand } from '../application/use-case/create.user.case';
 import { CommandBus } from '@nestjs/cqrs';
@@ -41,17 +41,17 @@ export class AuthController {
   @Post('registration')
   @HttpCode(201)
   @ApiOperation({ summary: 'Register a new user' })
-  @ApiBody({ type: UserCreateInputModule })
+  @ApiBody({ type: UserCreateInputDto })
   @ApiResponse({ status: 201, description: 'User registered successfully.' })
   @ApiResponse({ status: 400, description: 'Bad request.' })
-  async registerUser(@Body() inputModul: UserCreateInputModule) {
+  async registerUser(@Body() inputDto: UserCreateInputDto) {
     const user: Result = await this.commandBuse.execute(
       new CreateUserCommand(
-        inputModul.username,
-        inputModul.email,
-        inputModul.password,
-        inputModul.passwordConfirmation,
-        inputModul.agreeToTerms,
+        inputDto.username,
+        inputDto.email,
+        inputDto.password,
+        inputDto.passwordConfirmation,
+        inputDto.agreeToTerms,
       ),
     );
 
@@ -63,7 +63,7 @@ export class AuthController {
     }
 
     return {
-      message: `We have sent a link to confirm your email to ${inputModul.email}`,
+      message: `We have sent a link to confirm your email to ${inputDto.email}`,
     };
   }
 
