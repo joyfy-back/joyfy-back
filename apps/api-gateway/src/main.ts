@@ -13,9 +13,11 @@ async function bootstrap() {
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('documentation', app, document); 
+  SwaggerModule.setup('documentation', app, document);
+
   app.setGlobalPrefix('/api/v1');
-  app.use(cookieParser())
+  app.use(cookieParser());
+
   await app.listen(process.env.port ?? 3000);
 }
 void bootstrap();

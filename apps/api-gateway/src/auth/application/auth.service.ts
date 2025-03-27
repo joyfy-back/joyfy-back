@@ -1,105 +1,122 @@
-import { Injectable } from "@nestjs/common";
-import { AuthRepository } from "../infrastructure/auth.repository";
+import { Injectable } from '@nestjs/common';
+import { AuthRepository } from '../infrastructure/auth.repository';
 import * as argon2 from 'argon2';
-import { Result } from "apps/api-gateway/generalTypes/errorResponseType";
-import { User } from "@prisma/client";
-import { JwtService } from "@nestjs/jwt";
-
-
-
+import { Result } from 'apps/api-gateway/generalTypes/errorResponseType';
+import { User } from '@prisma/client';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class AuthService {
-    constructor(protected authRepository: AuthRepository, protected jwtService: JwtService) { }
+  constructor(
+    protected authRepository: AuthRepository,
+    protected jwtService: JwtService,
+  ) {}
 
-    async checkCreadentlais(email: string, password: string): Promise<Result<User>> {
-        const user = await this.authRepository.findIsEmail(email);
-        if (!user.success) {
-            return {
-                success: false,
-                message: 'There is no such email',
-                data: []
-            }
-        }
-
-        const isPasswordValid = await argon2.verify(user.data[0].passwordHash, password);
-
-        if (!isPasswordValid) {
-            return {
-                success: false,
-                message: 'The password is incorrect',
-                data: [],
-            };
-        }
-
-
-        return {
-            success: true,
-            message: 'password and email are correct',
-            data: [user.data[0]]
-        };
+  async checkCreadentlais(
+    email: string,
+    password: string,
+  ): Promise<Result<User>> {
+    const user = await this.authRepository.findIsEmail(email);
+    if (!user.success) {
+      return {
+        success: false,
+        message: 'There is no such email',
+        data: [],
+      };
     }
 
-    async checkValidateUserSessionByRefreshToken(refreshToken: string): Promise<Result> {
-        try {
-            const decodedToken = await this.jwtService.verify(refreshToken);
-            const sessionResult = await this.authRepository.findRottenSessions(decodedToken.userId, decodedToken.deviceId);
+    const isPasswordValid = await argon2.verify(
+      user.data[0].passwordHash,
+      password,
+    );
 
-            if (!sessionResult.success || decodedToken.iat < sessionResult.data[0].lastActiveDate) {
-                throw new Error();
-            }
-
-            return {
-                success: true,
-                message: 'Session and token are valid',
-                data: [decodedToken],
-            };
-        } catch (error) {
-            return {
-                success: false,
-                message: 'Invalid session or token',
-                data: [],
-            };
-        }
+    if (!isPasswordValid) {
+      return {
+        success: false,
+        message: 'The password is incorrect',
+        data: [],
+      };
     }
 
-    async updateToken(payload: any) {
+    return {
+      success: true,
+      message: 'password and email are correct',
+      data: [user.data[0]],
+    };
+  }
 
-        const body = { userLogin: payload.userLogin, userId: payload.userId, deviceId: payload.deviceId };
+  async checkValidateUserSessionByRefreshToken(
+    refreshToken: string,
+  ): Promise<Result> {
+    try {
+      const decodedToken = await this.jwtService.verify(refreshToken);
+      const sessionResult = await this.authRepository.findRottenSessions(
+        decodedToken.userId,
+        decodedToken.deviceId,
+      );
 
-        const tokens = { accessToken: this.jwtService.sign(body), refreshToken: this.jwtService.sign(body, { expiresIn: "1h" }) }
+      if (
+        !sessionResult.success ||
+        decodedToken.iat < sessionResult.data[0].lastActiveDate
+      ) {
+        throw new Error();
+      }
 
-
-        await this.authRepository.updateSesion(this.jwtService.decode(tokens.refreshToken).iat, payload.userId, payload.deviceId);
-
-        return tokens
-
+      return {
+        success: true,
+        message: 'Session and token are valid',
+        data: [decodedToken],
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: 'Invalid session or token',
+        data: [],
+      };
     }
+  }
 
-    async checkPasswordRecovery(code: string): Promise<Result> {
-        try {
-            const result = await this.authRepository.checkPasswordRecoveryCode(code)
+  async updateToken(payload: any) {
+    const body = {
+      userLogin: payload.userLogin,
+      userId: payload.userId,
+      deviceId: payload.deviceId,
+    };
 
-            if(!result.success){
-                throw new Error()
-            }
+    const tokens = {
+      accessToken: this.jwtService.sign(body),
+      refreshToken: this.jwtService.sign(body, { expiresIn: '1h' }),
+    };
 
-            return {
-                success: true,
-                message: '',
-                data: [result]
-            };
-        } catch (error) {
-            console.error('Error finding recovery password record:', error);
-            return {
-                success: false,
-                message: '',
-                data: []
-            };
-        }
+    await this.authRepository.updateSesion(
+      this.jwtService.decode(tokens.refreshToken).iat,
+      payload.userId,
+      payload.deviceId,
+    );
+
+    return tokens;
+  }
+
+  async checkPasswordRecovery(code: string): Promise<Result> {
+    try {
+      const result = await this.authRepository.checkPasswordRecoveryCode(code);
+
+      if (!result.success) {
+        throw new Error();
+      }
+
+      return {
+        success: true,
+        message: '',
+        data: [result],
+      };
+    } catch (error) {
+      console.error('Error finding recovery password record:', error);
+      return {
+        success: false,
+        message: '',
+        data: [],
+      };
     }
-
-
-
-
+  }
 }

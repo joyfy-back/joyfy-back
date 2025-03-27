@@ -8,24 +8,28 @@ import { AuthRepository } from '../../infrastructure/auth.repository';
 export class UpdatePasswordCommand {
   constructor(
     public email: string,
-    public password: string
-  ) { }
+    public password: string,
+  ) {}
 }
 
 @CommandHandler(UpdatePasswordCommand)
-export class UpdatePasswordUseCase implements ICommandHandler<UpdatePasswordCommand> {
-  constructor(
-    protected authRepository: AuthRepository,
-  ) { }
-  async execute(inputModul: UserCreateInputModule): Promise<Result<UserMapOutput>> {
+export class UpdatePasswordUseCase
+  implements ICommandHandler<UpdatePasswordCommand>
+{
+  constructor(protected authRepository: AuthRepository) {}
+  async execute(
+    inputModul: UserCreateInputModule,
+  ): Promise<Result<UserMapOutput>> {
     try {
-
       const passwordHash = await argon2.hash(inputModul.password);
 
-      const result = await this.authRepository.updatePassword(inputModul.email, passwordHash);
+      const result = await this.authRepository.updatePassword(
+        inputModul.email,
+        passwordHash,
+      );
 
       if (!result.success) {
-        throw new Error()
+        throw new Error();
       }
 
       return {

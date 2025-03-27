@@ -13,18 +13,31 @@ import { DeleteSeissionUseCase } from './application/use-case/delete.session.cas
 import { PasswordRecoveryUseCase } from './application/use-case/password.recovery.case';
 import { UpdatePasswordUseCase } from './application/use-case/update.password.case';
 
-
-
-const authProviders: Provider[] = [AuthRepository, AuthService, EmailService, EmailIsExistContsraint, UserNameIsExistContsraint]
-const useCaseAuth = [CreateUserUseCase, LoginUserUseCase, DeleteSeissionUseCase, PasswordRecoveryUseCase, UpdatePasswordUseCase]
+const authProviders: Provider[] = [
+  AuthRepository,
+  AuthService,
+  EmailService,
+  EmailIsExistContsraint,
+  UserNameIsExistContsraint,
+];
+const useCaseAuth = [
+  CreateUserUseCase,
+  LoginUserUseCase,
+  DeleteSeissionUseCase,
+  PasswordRecoveryUseCase,
+  UpdatePasswordUseCase,
+];
 
 @Module({
-  imports: [CqrsModule, JwtModule.register({
-    secret: 'your_secret_key',
-    signOptions: { expiresIn: '5m' },
-  }),],
+  imports: [
+    CqrsModule,
+    JwtModule.register({
+      secret: 'your_secret_key',
+      signOptions: { expiresIn: '5m' },
+    }),
+  ],
   controllers: [AuthController],
   providers: [...authProviders, ...useCaseAuth],
   exports: [],
 })
-export class AuthModule { }
+export class AuthModule {}

@@ -24,7 +24,9 @@ export class CreateUserUseCase implements ICommandHandler<CreateUserCommand> {
     protected emailService: EmailService,
     protected authRepository: AuthRepository,
   ) {}
-  async execute(inputModul: UserCreateInputModule): Promise<Result<UserMapOutput>> {
+  async execute(
+    inputModul: UserCreateInputModule,
+  ): Promise<Result<UserMapOutput>> {
     try {
       const passwordHash = await argon2.hash(inputModul.password);
 

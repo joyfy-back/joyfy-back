@@ -4,7 +4,7 @@ import { CqrsModule } from '@nestjs/cqrs';
 
 @Global()
 @Module({
-  imports:[],
+  imports: [],
   providers: [PrismaService],
   exports: [PrismaService],
 })

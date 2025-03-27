@@ -10,6 +10,5 @@ import { CqrsModule } from '@nestjs/cqrs';
   controllers: [ApiGatewayController],
   providers: [ApiGatewayService],
   exports: [],
-
 })
-export class ApiGatewayModule { }
+export class ApiGatewayModule {}
