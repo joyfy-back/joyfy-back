@@ -7,7 +7,7 @@ import { Result } from 'libs/shared/types';
 
 @Injectable()
 export class AuthRepository {
-  constructor(protected prisma: PrismaService) {}
+  constructor(protected prisma: PrismaService) { }
 
   async createUser(dto: UserType): Promise<Result<User>> {
     try {
@@ -421,4 +421,52 @@ export class AuthRepository {
       };
     }
   }
+
+  async deleteAllSessionsExceptCurrent(deviceId: string, userId: string) {
+    try {
+      await this.prisma.deviceSessions.deleteMany({
+        where: {
+          userId: userId,
+          deviceId: { not: deviceId },
+        },
+      });
+
+      return {
+        success: true,
+        message: 'successful delete for sessions in db',
+        data: []
+
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: formatErrorMessage(
+          error,
+          'failed database query',
+        ), data: []
+
+      };
+    }
+  }
+
+  async deleteSessionById(deviceId: string) {
+    try {
+      await this.prisma.deviceSessions.delete({
+        where: {
+          deviceId: deviceId
+        },
+      });
+    } catch (error) {
+      return {
+        success: true,
+        message: formatErrorMessage(
+          error,
+          'failed database query',
+        ), data: []
+
+      };
+    }
+  }
+
+
 }

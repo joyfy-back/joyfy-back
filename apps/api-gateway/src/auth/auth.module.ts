@@ -13,6 +13,8 @@ import { DeleteSessionUseCase } from './application/use-cases/delete-session.use
 import { LoginUserUseCase } from './application/use-cases/login-user.use-case';
 import { PasswordRecoveryUseCase } from './application/use-cases/password-recovery.use-case';
 import { UpdatePasswordUseCase } from './application/use-cases/update-password.use-case';
+import { GithubStrategy } from './strategy/github.strategy';
+import { JwtStrategy } from './strategy/jwt.strategy';
 
 
 
@@ -30,7 +32,7 @@ const useCaseAuth = [
   PasswordRecoveryUseCase,
   UpdatePasswordUseCase,
 ];
-// const strategys = [GithubStrategy]
+const strategys = [GithubStrategy, JwtStrategy]
 
 @Module({
   imports: [CqrsModule, JwtModule.register({
@@ -38,7 +40,7 @@ const useCaseAuth = [
     signOptions: { expiresIn: '5m' },
   }),],
   controllers: [AuthController],
-  providers: [...authProviders, ...useCaseAuth],
+  providers: [...authProviders, ...useCaseAuth, ...strategys],
   exports: [],
 })
 export class AuthModule {}
