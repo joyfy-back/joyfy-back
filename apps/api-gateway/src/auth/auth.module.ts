@@ -16,8 +16,6 @@ import { UpdatePasswordUseCase } from './application/use-cases/update-password.u
 import { GithubStrategy } from './strategy/github.strategy';
 import { JwtStrategy } from './strategy/jwt.strategy';
 
-
-
 const authProviders: Provider[] = [
   AuthRepository,
   AuthService,
@@ -32,13 +30,16 @@ const useCaseAuth = [
   PasswordRecoveryUseCase,
   UpdatePasswordUseCase,
 ];
-const strategys = [GithubStrategy, JwtStrategy]
+const strategys = [GithubStrategy, JwtStrategy];
 
 @Module({
-  imports: [CqrsModule, JwtModule.register({
-    secret: 'your_secret_key',
-    signOptions: { expiresIn: '5m' },
-  }),],
+  imports: [
+    CqrsModule,
+    JwtModule.register({
+      secret: 'your_secret_key',
+      signOptions: { expiresIn: '5m' },
+    }),
+  ],
   controllers: [AuthController],
   providers: [...authProviders, ...useCaseAuth, ...strategys],
   exports: [],

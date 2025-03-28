@@ -15,9 +15,7 @@ export class DeleteAllSessionsExceptCurrentCommand {
 export class DeleteAllSessionsExceptCurrentUseCase
   implements ICommandHandler<DeleteAllSessionsExceptCurrentCommand>
 {
-  constructor(
-    protected authRepository: AuthRepository,
-  ) {}
+  constructor(protected authRepository: AuthRepository) {}
   async execute(dto: DeleteAllSessionsExceptCurrentCommand): Promise<Result> {
     try {
       const result = await this.authRepository.deleteAllSessionsExceptCurrent(

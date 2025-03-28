@@ -13,16 +13,21 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { Response } from 'express';
-import { CommandBus } from "@nestjs/cqrs";
-import { TokensType } from "../type/auth.type";
-import { Result } from "apps/api-gateway/generalTypes/errorResponseType";
-import { AuthService } from "../application/auth.service";
-import { ApiBearerAuth, ApiBody, ApiOperation, ApiResponse } from "@nestjs/swagger";
-import { UserCreateInputDto } from "../dto/input-dto/user-create.dto";
-import { UserLoginInputDto } from "../dto/input-dto/user-login.dto";
-import { DeleteSessionCommand } from "../application/use-cases/delete-session.use-case";
-import { EmailInputDto } from "../dto/input-dto/user-email.dto";
-import { NewPasswordInputDto } from "../dto/input-dto/new-password.dto";
+import { CommandBus } from '@nestjs/cqrs';
+import { TokensType } from '../type/auth.type';
+import { Result } from 'apps/api-gateway/generalTypes/errorResponseType';
+import { AuthService } from '../application/auth.service';
+import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiOperation,
+  ApiResponse,
+} from '@nestjs/swagger';
+import { UserCreateInputDto } from '../dto/input-dto/user-create.dto';
+import { UserLoginInputDto } from '../dto/input-dto/user-login.dto';
+import { DeleteSessionCommand } from '../application/use-cases/delete-session.use-case';
+import { EmailInputDto } from '../dto/input-dto/user-email.dto';
+import { NewPasswordInputDto } from '../dto/input-dto/new-password.dto';
 import { CreateUserCommand } from '../application/use-cases/create-user.use-case';
 import { EmailService } from '../application/email.service';
 import { LoginUserCommand } from '../application/use-cases/login-user.use-case';
@@ -33,16 +38,14 @@ import { JwtAuthGuard } from '../strategy/jwt.strategy';
 import { DeleteAllSessionsExceptCurrentCommand } from '../application/use-cases/delete-all.sessions.except.current.use-case';
 import { DeleteByIdSessionCommand } from '../application/use-cases/delete-session.by.id.use-case';
 
-
-
 @Controller('auth')
 export class AuthController {
   constructor(
     protected commandBuse: CommandBus,
     protected authService: AuthService,
     protected emailService: EmailService,
-    protected authQueryRepository: AuthQueryRepository
-  ) { }
+    protected authQueryRepository: AuthQueryRepository,
+  ) {}
 
   @Post('registration')
   @HttpCode(201)
@@ -262,52 +265,56 @@ export class AuthController {
     );
   }
 
-  @Get("devices")
+  @Get('devices')
   @HttpCode(200)
   @UseGuards(JwtAuthGuard)
   async getDevices(@Request() req) {
-
     const sesions = await this.authQueryRepository.getSessions(req.user.userId);
 
     if (!sesions.success) {
-      throw new HttpException(`${sesions.message}`, HttpStatus.INTERNAL_SERVER_ERROR);
-
+      throw new HttpException(
+        `${sesions.message}`,
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
 
-    return sesions
-
+    return sesions;
   }
 
-
-  @Delete("devices")
+  @Delete('devices')
   @HttpCode(204)
   @UseGuards(JwtAuthGuard)
-  async deleteDevices(@Request() req,) {
-    
+  async deleteDevices(@Request() req) {
     const result = await this.commandBuse.execute(
-      new DeleteAllSessionsExceptCurrentCommand(req.user.userId, req.user.deviceId),
+      new DeleteAllSessionsExceptCurrentCommand(
+        req.user.userId,
+        req.user.deviceId,
+      ),
     );
 
     if (!result.success) {
-      throw new HttpException(`${result.message}`, HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(
+        `${result.message}`,
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
   }
 
-  @Delete("devices/:id")
+  @Delete('devices/:id')
   @HttpCode(204)
   @UseGuards(JwtAuthGuard)
-  async deleteByIdDevices(@Param("id") id: string, @Request() req,) {
-
+  async deleteByIdDevices(@Param('id') id: string, @Request() req) {
     const sesionDevice = await this.authQueryRepository.getSessionById(id);
 
     if (!sesionDevice?.success && sesionDevice?.message === 'not found') {
       throw new HttpException('sesion not found', HttpStatus.NOT_FOUND);
-
     }
 
     if (!sesionDevice?.success) {
-      throw new HttpException(`${sesionDevice?.message}`, HttpStatus.INTERNAL_SERVER_ERROR);
-
+      throw new HttpException(
+        `${sesionDevice?.message}`,
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
 
     const result = await this.commandBuse.execute(
@@ -315,7 +322,10 @@ export class AuthController {
     );
 
     if (!result?.success) {
-      throw new HttpException(`${sesionDevice?.message}`, HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(
+        `${sesionDevice?.message}`,
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
   }
 }
