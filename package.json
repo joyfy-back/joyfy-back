@@ -9,7 +9,7 @@
     "build": "nest build",
     "format": "prettier --write \"apps/**/*.ts\" \"libs/**/*.ts\"",
     "start": "nest start",
-    "start:dev": "cross-env ENV=DEVELOPMENT nest start --watch",
+    "start:dev": "nest start --watch",
     "start:debug": "cross-env ENV=TEST nest start --debug --watch",
     "start:dev:test": "cross-env ENV=TEST nest start --watch",
     "start:prod": "node dist/apps/api-gateway/main",
