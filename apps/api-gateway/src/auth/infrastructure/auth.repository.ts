@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import { Result } from '@libs/shared/types';
 import { DeviceSessions, User } from '@prisma/client';
 import { EmailConfirmationWithUser, UserType } from '../type/auth.type';
 import { PrismaService } from '../../shared/prisma/prisma.service';
 import { formatErrorMessage } from '../../shared/libs/format-error-message';
+import { Result } from 'libs/shared/types';
 
 @Injectable()
 export class AuthRepository {
@@ -317,7 +317,7 @@ export class AuthRepository {
   async updateCodeUserByConfirmEmail(
     userID: string,
     code: string,
-  ): Promise<Result> {
+  ): Promise<Result<any>> {
     try {
       const result = await this.prisma.emailConfirmation.updateMany({
         where: {

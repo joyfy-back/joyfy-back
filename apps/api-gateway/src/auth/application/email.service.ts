@@ -183,7 +183,7 @@ export class EmailService {
 
   async resendCode(email: string): Promise<Result> {
     try {
-      const user = await this.authRepository.findBlogOrEmail(email);
+      const user:any = await this.authRepository.findBlogOrEmail(email);
 
       if (!user.success) {
         return {
