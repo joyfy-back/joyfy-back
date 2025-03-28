@@ -3,8 +3,6 @@ import { PrismaService } from "../../shared/prisma/prisma.service";
 import { Result } from "libs/shared/types";
 import { formatErrorMessage } from "../../shared/libs/format-error-message";
 
-
-
 @Injectable()
 export class AuthQueryRepository {
     constructor(protected prisma: PrismaService) { }

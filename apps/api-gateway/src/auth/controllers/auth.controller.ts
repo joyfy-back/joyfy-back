@@ -283,19 +283,15 @@ export class AuthController {
   @HttpCode(204)
   @UseGuards(JwtAuthGuard)
   async deleteDevices(@Request() req,) {
-
+    
     const result = await this.commandBuse.execute(
       new DeleteAllSessionsExceptCurrentCommand(req.user.userId, req.user.deviceId),
     );
 
-
     if (!result.success) {
       throw new HttpException(`${result.message}`, HttpStatus.INTERNAL_SERVER_ERROR);
     }
-
-
   }
-
 
   @Delete("devices/:id")
   @HttpCode(204)
@@ -318,7 +314,7 @@ export class AuthController {
       new DeleteByIdSessionCommand(req.user.deviceId),
     );
 
-    if(!result?.success){
+    if (!result?.success) {
       throw new HttpException(`${sesionDevice?.message}`, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
