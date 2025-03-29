@@ -4,7 +4,6 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import configuration from '../configs/configuration';
 import { Environments } from '../configs/env-setings';
 import { getEnvFilePath } from '../configs/getEnvFilePath';
-import { PrismaClient } from '@prisma/client';
 
 @Global()
 @Module({
