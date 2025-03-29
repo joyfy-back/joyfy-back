@@ -56,8 +56,8 @@ export class AuthController {
   async registerUser(@Body() dto: UserCreateInputDto) {
     const user: Result = await this.commandBuse.execute(
       new CreateUserCommand(
-        dto.username,
         dto.email,
+        dto.username,
         dto.password,
         dto.agreeToTerms,
         dto.passwordConfirmation,
