@@ -1,0 +1,52 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  userId         String             @id @default(uuid())
+  username       String             @unique
+  email          String             @unique
+  passwordHash   String
+  agreeToTerms   Boolean
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @updatedAt 
+  emailConfirmation EmailConfirmation?
+  sessions          DeviceSessions[]
+
+  @@map("users")
+}
+
+model EmailConfirmation {
+  id              String    @id @default(uuid())
+  confirmationCode String
+  expirationDate  DateTime
+  isConfirmed     Boolean   @default(false)
+  userId          String    @unique 
+  user            User      @relation(fields: [userId], references: [userId], onDelete: Cascade)
+
+  @@map("email_confirmations")
+}
+
+model DeviceSessions {
+  deviceId        String   @id
+  ip              String
+  lastActiveDate  String
+  title           String
+  userId          String   
+  user            User     @relation(fields: [userId], references: [userId], onDelete: Cascade) // Связь с User
+
+  @@map("device_sessions")
+}
+
+model RecoveryPassword {
+  recoveryPasswordId String @id @default(uuid()) // Первичный ключ, генерируемый как UUID
+  code               String // Поле code
+  email              String // Поле email
+
+  @@map("recovery_password") // Указываем имя таблицы в базе данных
+}
