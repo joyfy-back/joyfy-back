@@ -7,6 +7,13 @@ import { ConfigurationType } from './configs/configuration';
 
 async function bootstrap() {
   const app = await NestFactory.create(ApiGatewayModule);
+  app.enableCors({
+    origin: '*',
+    methods: 'GET,POST,PUT,DELETE,OPTIONS',
+    allowedHeaders: 'Content-Type,Authorization,X-Requested-With',
+    credentials: true,
+  });
+
   const config = new DocumentBuilder()
     .setTitle('My API') // Заголовок API
     .setDescription('The API description')
@@ -14,14 +21,8 @@ async function bootstrap() {
     .addBearerAuth()
     .build();
 
-  app.enableCors({
-    origin: '*',  
-    methods: 'GET,POST,PUT,DELETE',
-    allowedHeaders: 'Content-Type,Authorization',
-  });
-
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('documentation', app, document);
+  SwaggerModule.setup('swagger', app, document);
 
   const configService = app.get(ConfigService<ConfigurationType, true>);
   const apiSettings = configService.get('apiSettings', { infer: true });
