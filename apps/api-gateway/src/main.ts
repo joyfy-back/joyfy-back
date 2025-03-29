@@ -14,15 +14,17 @@ async function bootstrap() {
     .addBearerAuth()
     .build();
 
+  app.enableCors({
+    origin: '*',  
+    methods: 'GET,POST,PUT,DELETE',
+    allowedHeaders: 'Content-Type,Authorization',
+  });
+
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('documentation', app, document);
 
   const configService = app.get(ConfigService<ConfigurationType, true>);
   const apiSettings = configService.get('apiSettings', { infer: true });
-  const dbSettings = configService.get('dbSettings', { infer: true });
-  const environmentSettings = configService.get('environmentSettings', {
-    infer: true,
-  });
 
   app.setGlobalPrefix('/api/v1');
   app.use(cookieParser());
