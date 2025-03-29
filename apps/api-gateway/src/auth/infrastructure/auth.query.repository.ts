@@ -9,6 +9,7 @@ export class AuthQueryRepository {
 
   async getSessions(userId: string): Promise<Result<any>> {
     try {
+      debugger;
       const sessions = await this.prisma.deviceSessions.findMany({
         where: {
           userId: userId,
@@ -23,7 +24,7 @@ export class AuthQueryRepository {
 
       const mappedSessions = sessions.map((session) => ({
         ...session,
-        lastActiveDate: new Date(session.lastActiveDate), // Конвертируем строку в Date
+        lastActiveDate: new Date(+session.lastActiveDate * 1000).toISOString(), // Конвертируем строку в Date
       }));
 
       return {
@@ -57,6 +58,12 @@ export class AuthQueryRepository {
           data: [],
         };
       }
+
+      return {
+        success: true,
+        message: 'not found',
+        data: [result],
+      };
     } catch (error) {
       return {
         success: false,

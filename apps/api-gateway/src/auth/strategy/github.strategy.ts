@@ -1,25 +1,26 @@
-import { Injectable } from '@nestjs/common';
-import { PassportStrategy } from '@nestjs/passport';
-import { Strategy } from 'passport-github2';
-import { ConfigService } from '@nestjs/config';
+// import { Injectable } from '@nestjs/common';
+// import { PassportStrategy } from '@nestjs/passport';
+// import { Strategy } from 'passport-github2';
+// import { ConfigService } from '@nestjs/config';
 
-@Injectable()
-export class GithubStrategy extends PassportStrategy(Strategy, 'github') {
-  constructor(private configService: ConfigService) {
-    super({
-      clientID: configService.get<string>('GITHUB_CLIENT_ID', ''),
-      clientSecret: configService.get<string>('GITHUB_CLIENT_SECRET', ''),
-      callbackURL: configService.get<string>('GITHUB_CALLBACK_URL', ''),
-      scope: ['user:email'],
-    });
-  }
+// @Injectable()
+// export class GithubStrategy extends PassportStrategy(Strategy, 'github') {
+//   constructor(protected configService: ConfigService) {
+//     const settingsGitHub = {
+//       clientID: configService.get<string>('GITHUB_CLIENT_ID', ''),
+//       clientSecret: configService.get<string>('GITHUB_CLIENT_SECRET', ''),
+//       callbackURL: configService.get<string>('GITHUB_CALLBACK_URL', ''),
+//       scope: ['user:email'],
+//     }
+//     super(settingsGitHub);
+//   }
 
-  async validate(accessToken: string, profile: any) {
-    return {
-      githubId: profile.id,
-      username: profile.username,
-      email: profile.emails?.[0]?.value,
-      accessToken,
-    };
-  }
-}
+//   async validate(accessToken: string, profile: any) {
+//     return {
+//       githubId: profile.id,
+//       username: profile.username,
+//       email: profile.emails?.[0]?.value,
+//       accessToken,
+//     };
+//   }
+// }

@@ -16,7 +16,34 @@ spec:
         project: PROJECT
     spec:
       containers:
-        - name: PROJECT
-          image: REGISTRY_HOSTNAME/PROJECT:TAG_VERSION
-          ports:
-            - containerPort: PORT_CONTAINER
+         - name: PROJECT
+           image: REGISTRY_HOSTNAME/PROJECT:TAG_VERSION
+           ports:
+             - containerPort: PORT_CONTAINER
+
+           env:
+             - name: GITHUB_CLIENT_ID
+               valueFrom:
+                 secretKeyRef:
+                   name: api-gateway-service-production-config-secret
+                   key: GITHUB_CLIENT_ID
+             - name: GITHUB_CLIENT_SECRET
+               valueFrom:
+                 secretKeyRef:
+                   name: api-gateway-service-production-config-secret
+                   key: GITHUB_CLIENT_SECRET
+             - name: GITHUB_CALLBACK_URL
+               valueFrom:
+                 secretKeyRef:
+                   name: api-gateway-service-production-config-secret
+                   key: GITHUB_CALLBACK_URL
+             - name: SECRET
+               valueFrom:
+                 secretKeyRef:
+                   name: api-gateway-service-production-config-secret
+                   key: SECRET
+             - name: DATABASE_URL
+               valueFrom:
+                 secretKeyRef:
+                   name: api-gateway-service-production-config-secret
+                   key: DATABASE_URL

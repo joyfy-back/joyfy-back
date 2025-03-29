@@ -455,9 +455,14 @@ export class AuthRepository {
           deviceId: deviceId,
         },
       });
-    } catch (error) {
       return {
         success: true,
+        message: '',
+        data: [],
+      };
+    } catch (error) {
+      return {
+        success: false,
         message: formatErrorMessage(error, 'failed database query'),
         data: [],
       };

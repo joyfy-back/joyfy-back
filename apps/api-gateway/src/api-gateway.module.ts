@@ -4,6 +4,7 @@ import { ApiGatewayService } from './api-gateway.service';
 import { AuthModule } from './auth/auth.module';
 import { SharedModule } from './shared/shared.module';
 import { CqrsModule } from '@nestjs/cqrs';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
   imports: [SharedModule, AuthModule],
