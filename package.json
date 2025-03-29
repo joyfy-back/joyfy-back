@@ -18,7 +18,7 @@
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "cross-env ENV=TEST jest --config ./apps/api-gateway/test/jest-e2e.json",
+    "test:e2e": "export ENV=TEST jest --config ./apps/api-gateway/test/jest-e2e.json",
     "build:api-gateway": "nest build api-gateway",
     "start:api-gateway": "node dist/apps/api-gateway/main",
     "start:dev:api-gateway": "nest start api-gateway --watch",
