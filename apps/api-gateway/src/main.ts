@@ -21,9 +21,26 @@ async function bootstrap() {
     .addBearerAuth()
     .build();
 
-  const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('swagger', app, document);
 
+  const document = SwaggerModule.createDocument(app, config);
+  SwaggerModule.setup('api/v1/swagger', app, document, {  // Добавлен префикс /api/v1
+    customCssUrl: 'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.15.5/swagger-ui.min.css',
+    customJs: [
+      'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.15.5/swagger-ui-bundle.js',
+      'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.15.5/swagger-ui-standalone-preset.js',
+    ],
+    swaggerOptions: {
+      url: '/api/v1/swagger-json',  // Явное указание URL для JSON
+      persistAuthorization: true,
+    }
+  });
+
+  // Добавьте этот endpoint для сырого JSON
+  app.use('/api/v1/swagger-json', (req, res) => {
+    res.json(document);
+  });
+
+  console.log(document,"documentdocumentdocumentdocument")
   const configService = app.get(ConfigService<ConfigurationType, true>);
   const apiSettings = configService.get('apiSettings', { infer: true });
 
