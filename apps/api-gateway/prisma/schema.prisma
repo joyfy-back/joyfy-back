@@ -1,5 +1,5 @@
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
   binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
 }
 
@@ -9,45 +9,77 @@ datasource db {
 }
 
 model User {
-  userId         String             @id @default(uuid())
-  username       String             @unique
-  email          String             @unique
-  passwordHash   String
-  agreeToTerms   Boolean
-  createdAt      DateTime           @default(now())
-  updatedAt      DateTime           @updatedAt 
+  userId            String             @id @default(uuid())
+  username          String             @unique
+  email             String             @unique
+  passwordHash      String
+  agreeToTerms      Boolean
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
   emailConfirmation EmailConfirmation?
   sessions          DeviceSessions[]
+  account           Account?
 
   @@map("users")
 }
 
+model Account {
+  accountId   String      @id @default(uuid())
+  userId      String?     @unique
+  user        User?       @relation(fields: [userId], references: [userId], onDelete: Cascade)
+  GithubUser  GithubUser?
+  GooglebUser GoogleUser?
+
+  @@map("accounts")
+}
+
+model GithubUser {
+  githubId  String  @unique
+  username  String
+  email     String  
+  accountId String  @unique
+  account   Account @relation(fields: [accountId], references: [accountId], onDelete: Cascade)
+
+  @@map("github_user")
+}
+
+model GoogleUser {
+  googleId  String  @unique
+  username  String
+  email     String  
+  avatar    String
+  accountId String  @unique
+  account   Account @relation(fields: [accountId], references: [accountId], onDelete: Cascade)
+
+  @@map("googl_user")
+}
+
 model EmailConfirmation {
-  id              String    @id @default(uuid())
+  id               String   @id @default(uuid())
   confirmationCode String
-  expirationDate  DateTime
-  isConfirmed     Boolean   @default(false)
-  userId          String    @unique 
-  user            User      @relation(fields: [userId], references: [userId], onDelete: Cascade)
+  expirationDate   DateTime
+  isConfirmed      Boolean  @default(false)
+  userId           String   @unique
+  user             User     @relation(fields: [userId], references: [userId], onDelete: Cascade)
 
   @@map("email_confirmations")
 }
 
 model DeviceSessions {
-  deviceId        String   @id
-  ip              String
-  lastActiveDate  String
-  title           String
-  userId          String   
-  user            User     @relation(fields: [userId], references: [userId], onDelete: Cascade) // Связь с User
+  deviceId       String @id
+  ip             String
+  lastActiveDate String
+  title          String
+  userId         String
+  user           User   @relation(fields: [userId], references: [userId], onDelete: Cascade)
 
   @@map("device_sessions")
 }
 
 model RecoveryPassword {
-  recoveryPasswordId String @id @default(uuid()) // Первичный ключ, генерируемый как UUID
-  code               String // Поле code
-  email              String // Поле email
+  recoveryPasswordId String @id @default(uuid())
+  code               String
+  email              String
 
-  @@map("recovery_password") // Указываем имя таблицы в базе данных
+  @@map("recovery_password")
 }

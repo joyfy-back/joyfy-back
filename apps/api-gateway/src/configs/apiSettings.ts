@@ -13,4 +13,11 @@ export class ApiSettings {
   GITHUB_CALLBACK_URL: string = String(
     this.environmentVariables.GITHUB_CALLBACK_URL,
   );
+  RECAPTCHA_SECRET_KEY: string = String(
+    this.environmentVariables.RECAPTCHA_SECRET_KEY,
+  );
+  GOOGLE_CLIENT_ID: string = String(this.environmentVariables.GOOGLE_CLIENT_ID);
+  GOOGLE_CLIENT_SECRET: string = String(
+    this.environmentVariables.GOOGLE_CLIENT_SECRET,
+  );
 }

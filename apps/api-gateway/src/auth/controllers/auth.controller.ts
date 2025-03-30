@@ -20,6 +20,8 @@ import { AuthService } from '../application/auth.service';
 import {
   ApiBearerAuth,
   ApiBody,
+  ApiCookieAuth,
+  ApiExcludeEndpoint,
   ApiOperation,
   ApiParam,
   ApiResponse,
@@ -38,6 +40,11 @@ import { AuthQueryRepository } from '../infrastructure/auth.query.repository';
 import { JwtAuthGuard } from '../strategy/jwt.strategy';
 import { DeleteAllSessionsExceptCurrentCommand } from '../application/use-cases/delete-all.sessions.except.current.use-case';
 import { DeleteByIdSessionCommand } from '../application/use-cases/delete-session.by.id.use-case';
+import { AuthGuard } from '@nestjs/passport';
+import { JwtService } from '@nestjs/jwt';
+import { CreateAccountUserGithubCommand } from '../application/use-cases/create-account.user.github.use-case';
+import { CreateAccountUserGoogleCommand } from '../application/use-cases/create-account.user.google.use-case';
+import { RecaptchaService } from '../application/recaptcha.service';
 
 @Controller('auth')
 export class AuthController {
@@ -46,7 +53,9 @@ export class AuthController {
     protected authService: AuthService,
     protected emailService: EmailService,
     protected authQueryRepository: AuthQueryRepository,
-  ) {}
+    protected jwtService: JwtService,
+    protected recaptchaService: RecaptchaService,
+  ) { }
 
   @Post('registration')
   @HttpCode(201)
@@ -55,6 +64,18 @@ export class AuthController {
   @ApiResponse({ status: 201, description: 'User registered successfully.' })
   @ApiResponse({ status: 400, description: 'Bad request.' })
   async registerUser(@Body() dto: UserCreateInputDto) {
+    const result = await this.authQueryRepository.getAccount(dto.email);
+
+    let accounts = {
+      isWasRegistered: false,
+      data: result.data,
+    };
+    if (!result.success) {
+      accounts['isWasRegistered'] = false;
+    } else {
+      accounts['isWasRegistered'] = true;
+    }
+
     const user: Result = await this.commandBuse.execute(
       new CreateUserCommand(
         dto.email,
@@ -62,6 +83,7 @@ export class AuthController {
         dto.password,
         dto.agreeToTerms,
         dto.passwordConfirmation,
+        accounts,
       ),
     );
 
@@ -171,10 +193,22 @@ export class AuthController {
 
   @Post('refresh-token')
   @HttpCode(200)
-  @ApiOperation({ summary: 'Refresh access token' })
+  @ApiOperation({ 
+    summary: 'Refresh access token', 
+    description: 'Generates new access token using refresh token from cookies. Refresh token must be sent in HttpOnly cookie.' 
+  })
   @ApiBearerAuth()
-  @ApiResponse({ status: 200, description: 'Token refreshed successfully.' })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Returns accessToken',
+    schema: {
+      example: {
+        accessToken: 'dwe234324esadfa312312edsaasd'
+      }
+    }
+  })
   @ApiResponse({ status: 401, description: 'Unauthorized.' })
+  @ApiCookieAuth('refreshToken')
   async refreshToken(@Res() res: Response, @Request() req) {
     const result =
       await this.authService.checkValidateUserSessionByRefreshToken(
@@ -229,12 +263,30 @@ export class AuthController {
   @HttpCode(204)
   @ApiOperation({ summary: 'Recover user password' })
   @ApiBody({ type: EmailInputDto })
+  @ApiBody({
+    description: 'Email and reCAPTCHA verification',
+    type: EmailInputDto,
+    examples: {
+      example: {
+        value: {
+          email: "user@example.com",
+          recaptcha: "03AGdBq27Q..."
+        }
+      }
+    }
+  })
+  
   @ApiResponse({
     status: 204,
     description: 'Password recovery email sent successfully.',
   })
   @ApiResponse({ status: 400, description: 'Bad request.' })
-  async passwordRecovery(@Body() dto: EmailInputDto) {
+  async passwordRecovery(
+    @Body() dto: EmailInputDto,
+    @Body('recaptcha') recaptcha: string,
+  ) {
+    await this.recaptchaService.validateRecaptcha(recaptcha);
+
     const { email } = dto;
 
     const result = await this.commandBuse.execute(
@@ -250,9 +302,27 @@ export class AuthController {
   @HttpCode(204)
   @ApiOperation({ summary: 'Set new password' })
   @ApiBody({ type: NewPasswordInputDto })
+  @ApiBody({
+    description: 'New password details with verification codes',
+    type: NewPasswordInputDto,
+    examples: {
+      example: {
+        value: {
+          recoveryCode: "550e8400-e29b-41d4-a716-446655440000",
+          newPassword: "NewSecurePassword123!",
+          recaptcha: "03AGdBq27Q..."
+        }
+      }
+    }
+  })
   @ApiResponse({ status: 204, description: 'Password updated successfully.' })
   @ApiResponse({ status: 404, description: 'User not found.' })
-  async newPassword(@Body() dto: NewPasswordInputDto) {
+  async newPassword(
+    @Body() dto: NewPasswordInputDto,
+    @Body('recaptcha') recaptcha: string,
+  ) {
+    await this.recaptchaService.validateRecaptcha(recaptcha);
+
     const result = await this.authService.checkPasswordRecovery(
       dto.recoveryCode,
     );
@@ -266,16 +336,79 @@ export class AuthController {
     );
   }
 
+  @Get('github/callback')
+  @UseGuards(AuthGuard('github'))
+  @ApiExcludeEndpoint()
+  async githubCallback(@Request() req, @Res() res: Response) {
+    const user = req.user;
+
+    const result = await this.commandBuse.execute(
+      new CreateAccountUserGithubCommand(
+        req.user.email,
+        req.user.username,
+        req.user.githubId,
+      ),
+    );
+
+    if (!result.success) {
+      throw new HttpException(
+        `${result.message}`,
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+
+    const token = this.jwtService.sign({
+      id: user.githubId,
+      username: user.username,
+    });
+
+    return res.redirect(
+      `https://joyfy.online/auth/github/login-success?token=${token}`,
+    );
+  }
+
+  @Get('google/callback')
+  @UseGuards(AuthGuard('google'))
+  @ApiExcludeEndpoint()
+  async googleCallback(@Request() req, @Res() res: Response) {
+    const user = req.user;
+
+    const result = await this.commandBuse.execute(
+      new CreateAccountUserGoogleCommand(
+        req.user.email,
+        req.user.username,
+        req.user.googleId,
+        req.user.avatar,
+      ),
+    );
+
+    if (!result.success) {
+      throw new HttpException(
+        `${result.message}`,
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+
+    const token = this.jwtService.sign({
+      id: user.googleId,
+      username: user.username,
+    });
+
+    return res.redirect(
+      `https://joyfy.online/auth/google/login-success?token=${token}`,
+    );
+  }
+
   @Get('devices')
   @HttpCode(200)
   @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Get all devices sessions' })
   @ApiResponse({ 
     status: 200, 
     description: 'Returns all active sessions for user',
     schema: {
       example: {
-        success: true,
         data: [
           {
             deviceId: "string",
@@ -299,12 +432,15 @@ export class AuthController {
       );
     }
 
-    return sesions;
+    return {
+      data: sesions.data
+    };
   }
 
   @Delete('devices')
   @HttpCode(204)
   @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Terminate all sessions except current' })
   @ApiResponse({ status: 204, description: 'All sessions deleted except current' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
@@ -328,6 +464,7 @@ export class AuthController {
   @Delete('devices/:id')
   @HttpCode(204)
   @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Terminate specific session' })
   @ApiParam({ name: 'id', description: 'Device session ID' })
   @ApiResponse({ status: 204, description: 'Session successfully terminated' })
