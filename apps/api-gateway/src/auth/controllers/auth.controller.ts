@@ -21,6 +21,7 @@ import {
   ApiBearerAuth,
   ApiBody,
   ApiOperation,
+  ApiParam,
   ApiResponse,
 } from '@nestjs/swagger';
 import { UserCreateInputDto } from '../dto/input-dto/user-create.dto';
@@ -268,6 +269,26 @@ export class AuthController {
   @Get('devices')
   @HttpCode(200)
   @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Get all devices sessions' })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Returns all active sessions for user',
+    schema: {
+      example: {
+        success: true,
+        data: [
+          {
+            deviceId: "string",
+            ip: "string",
+            title: "string",
+            lastActiveDate: "2023-01-01T00:00:00.000Z"
+          }
+        ]
+      }
+    }
+  })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 500, description: 'Internal Server Error' })
   async getDevices(@Request() req) {
     const sesions = await this.authQueryRepository.getSessions(req.user.userId);
 
@@ -284,6 +305,10 @@ export class AuthController {
   @Delete('devices')
   @HttpCode(204)
   @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Terminate all sessions except current' })
+  @ApiResponse({ status: 204, description: 'All sessions deleted except current' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 500, description: 'Internal Server Error' })
   async deleteDevices(@Request() req) {
     const result = await this.commandBuse.execute(
       new DeleteAllSessionsExceptCurrentCommand(
@@ -303,6 +328,12 @@ export class AuthController {
   @Delete('devices/:id')
   @HttpCode(204)
   @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Terminate specific session' })
+  @ApiParam({ name: 'id', description: 'Device session ID' })
+  @ApiResponse({ status: 204, description: 'Session successfully terminated' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 404, description: 'Session not found' })
+  @ApiResponse({ status: 500, description: 'Internal Server Error' })
   async deleteByIdDevices(@Param('id') id: string, @Request() req) {
     const sesionDevice = await this.authQueryRepository.getSessionById(id);
 
