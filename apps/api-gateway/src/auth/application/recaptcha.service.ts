@@ -8,7 +8,7 @@ export class RecaptchaService {
 
   constructor(protected configService: ConfigService) {
     const result = configService.get('apiSettings', { infer: true });
-    this.secretKey = result.RECAPTCHA_SECRET_KEY;
+    this.secretKey = result.RECAPTCHA_SECRET_KEY || 'null';
   }
 
   async validateRecaptcha(recaptchaResponse: string): Promise<boolean> {
