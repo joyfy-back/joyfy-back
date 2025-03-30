@@ -3,18 +3,18 @@
   "name": "joyfy_online",
   "builds": [
     {
-      "src": "apps/api-gateway/src/main.ts",
+      "src": "apps/api-gateway/src/main.ts", 
       "use": "@vercel/node",
       "config": {
-        "buildCommand": "npm run buildvercel"
+        "buildCommand": "npm run buildvercel",  
+        "startCommand": "npm run start:prod"   
       }
     }
   ],
   "routes": [
     {
       "src": "/(.*)",
-      "dest": "apps/api-gateway/src/main.ts"
+      "dest": "dist/apps/api-gateway/main.js"  
     }
   ]
 }
-
