@@ -3,18 +3,51 @@
   "name": "joyfy_online",
   "builds": [
     {
-      "src": "apps/api-gateway/src/main.ts", 
+      "src": "apps/api-gateway/src/main.ts",
       "use": "@vercel/node",
       "config": {
-        "buildCommand": "npm run buildvercel",  
-        "startCommand": "npm run start:prod"   
+        "buildCommand": "npm run buildvercel",
+        "startCommand": "npm run start:prod",
+        "includeFiles": [
+          "dist/**",
+          "prisma/**",
+          "node_modules/.prisma/**",
+          "apps/api-gateway/src/swagger-ui-assets/**"
+        ]
       }
     }
   ],
   "routes": [
     {
+      "src": "/api/v1/swagger",
+      "dest": "dist/apps/api-gateway/main.js"
+    },
+    {
+      "src": "/api/v1/swagger-json",
+      "dest": "dist/apps/api-gateway/main.js"
+    },
+    {
+      "src": "/api/v1/(.*)",
+      "dest": "dist/apps/api-gateway/main.js"
+    },
+    {
       "src": "/(.*)",
-      "dest": "dist/apps/api-gateway/main.js"  
+      "dest": "dist/apps/api-gateway/main.js",
+      "headers": {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "GET,POST,PUT,DELETE,OPTIONS",
+        "Access-Control-Allow-Headers": "Content-Type,Authorization"
+      }
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/api/v1/swagger",
+      "destination": "/api/v1/swagger"
+    },
+    {
+      "source": "/api/v1/swagger-json",
+      "destination": "/api/v1/swagger-json"
     }
   ]
 }
