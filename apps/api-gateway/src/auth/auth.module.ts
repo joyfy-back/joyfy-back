@@ -21,11 +21,17 @@ import {
 } from './application/use-cases/delete-session.by.id.use-case';
 import { AuthQueryRepository } from './infrastructure/auth.query.repository';
 import { ConfigService } from '@nestjs/config';
+import { RecaptchaService } from './application/recaptcha.service';
+import { CreateAccountUserGithubCommand, CreateAccountUserGithubUseCase } from './application/use-cases/create-account.user.github.use-case';
+import { GithubStrategy } from './strategy/github.strategy';
+import { GoogleStrategy } from './strategy/google.strategy';
+import { CreateAccountUserGoogleUseCase } from './application/use-cases/create-account.user.google.use-case';
 
 const authProviders: Provider[] = [
   AuthRepository,
   AuthService,
   EmailService,
+  RecaptchaService,
   EmailIsExistConstraint,
   UserNameIsExistConstraint,
   AuthQueryRepository,
@@ -39,19 +45,24 @@ const useCaseAuth = [
   DeleteAllSessionsExceptCurrentUseCase,
   DeleteByIdSessionCommand,
   DeleteByIdUseCase,
+  CreateAccountUserGithubUseCase,
+  CreateAccountUserGoogleUseCase
 ];
-const strategys = [JwtStrategy];
+const strategys = [JwtStrategy, GithubStrategy, GoogleStrategy];
 
 @Module({
   imports: [
     CqrsModule,
     JwtModule.registerAsync({
-      useFactory: async (configService: ConfigService) => ({
-        secret: configService.get<string>('SECRET'),
-        signOptions: {
-          expiresIn: '5m',
-        },
-      }),
+      useFactory: async (configService: ConfigService) => {
+        const apiSettings = configService.get('apiSettings', { infer: true });
+        return {
+          secret: apiSettings.SECRET,
+          signOptions: {
+            expiresIn: '40m',
+          },
+        };
+      },
       inject: [ConfigService],
     }),
   ],
@@ -59,4 +70,4 @@ const strategys = [JwtStrategy];
   providers: [...authProviders, ...useCaseAuth, ...strategys],
   exports: [],
 })
-export class AuthModule {}
+export class AuthModule { }

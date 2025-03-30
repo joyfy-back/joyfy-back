@@ -43,3 +43,9 @@ export type TokensType = {
   accessToken: string;
   refreshToken: string;
 };
+
+export type GithubType = {
+  githubId: string;
+  username: string;
+  email: string;
+};

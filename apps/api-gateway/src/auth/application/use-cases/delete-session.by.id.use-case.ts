@@ -14,7 +14,6 @@ export class DeleteByIdUseCase
   constructor(protected authRepository: AuthRepository) {}
   async execute(dto: DeleteByIdSessionCommand): Promise<Result> {
     try {
-      debugger;
       const result = await this.authRepository.deleteSessionById(dto.deviceId);
 
       if (!result?.success) {

@@ -4,12 +4,14 @@ import { EmailConfirmationWithUser, UserType } from '../type/auth.type';
 import { PrismaService } from '../../shared/prisma/prisma.service';
 import { formatErrorMessage } from '../../shared/libs/format-error-message';
 import { Result } from 'libs/shared/types';
+import { CreateAccountUserGithubCommand } from '../application/use-cases/create-account.user.github.use-case';
+import { CreateAccountUserGoogleCommand } from '../application/use-cases/create-account.user.google.use-case';
 
 @Injectable()
 export class AuthRepository {
   constructor(protected prisma: PrismaService) {}
 
-  async createUser(dto: UserType): Promise<Result<User>> {
+  async createUser(dto: UserType, account: any): Promise<Result<User>> {
     try {
       const user = await this.prisma.user.create({
         data: {
@@ -26,10 +28,27 @@ export class AuthRepository {
           },
         },
         include: {
-          emailConfirmation: true, // Включаем данные подтверждения email
+          emailConfirmation: true,
         },
       });
 
+      
+      if (!account.isWasRegistered) {
+        await this.prisma.account.create({
+          data: {
+            userId: user.userId, 
+          },
+        });
+      } else {
+        await this.prisma.account.update({
+          where: {
+            accountId: account.data[0].accountId,
+          },
+          data: {
+            userId: user.userId,
+          },
+        });
+      }
       return {
         success: true,
         message: 'user successfully created in db',
@@ -44,7 +63,6 @@ export class AuthRepository {
       };
     }
   }
-
   async findUserByConfirmEmail(
     code: string,
   ): Promise<Result<EmailConfirmationWithUser>> {
@@ -76,7 +94,6 @@ export class AuthRepository {
       };
     }
   }
-
   async updateConfirmation(userId: string): Promise<Result<never>> {
     try {
       const result = await this.prisma.emailConfirmation.updateMany({
@@ -107,7 +124,6 @@ export class AuthRepository {
       };
     }
   }
-
   async findIsEmail(email: string): Promise<Result<User>> {
     try {
       const user = await this.prisma.user.findUnique({
@@ -137,6 +153,79 @@ export class AuthRepository {
     }
   }
 
+  async createAccountAndGithubUser(dto: CreateAccountUserGithubCommand) {
+    try {
+      const result = this.prisma.$transaction(async (prisma) => {
+        const account = await prisma.account.create({
+          data: {},
+        });
+
+        const githubUser = await prisma.githubUser.create({
+          data: {
+            githubId: dto.githubId,
+            username: dto.username,
+            email: dto.email,
+            accountId: account.accountId,
+          },
+        });
+
+        return { account, githubUser };
+      });
+
+      if (!result) {
+        throw new Error();
+      }
+
+      return {
+        success: true,
+        message: 'the account created successfully',
+        data: [result],
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: '',
+        data: [],
+      };
+    }
+  }
+  async createAccountAndGoogleUser(dto: CreateAccountUserGoogleCommand) {
+    try {
+      const result = await this.prisma.$transaction(async (prisma) => {
+        const account = await prisma.account.create({
+          data: {},
+        });
+
+        const googleUser = await prisma.googleUser.create({
+          data: {
+            googleId: dto.googleId,
+            username: dto.username,
+            email: dto.email,
+            avatar: dto.avatar,
+            accountId: account.accountId,
+          },
+        });
+
+        return { account, googleUser };
+      });
+
+      if (!result) {
+        throw new Error();
+      }
+
+      return {
+        success: true,
+        message: 'The account created successfully',
+        data: [result],
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: 'Failed to create account and Google user',
+        data: [],
+      };
+    }
+  }
   async findIsUserName(username: string): Promise<Result<User>> {
     try {
       const user = await this.prisma.user.findUnique({

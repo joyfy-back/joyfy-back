@@ -34,7 +34,7 @@ export class LoginUserUseCase implements ICommandHandler<LoginUserCommand> {
 
       const tokens = {
         accessToken: this.jwtService.sign(payload),
-        refreshToken: this.jwtService.sign(payload, { expiresIn: '1h' }),
+        refreshToken: this.jwtService.sign(payload, { expiresIn: '1d' }),
       };
 
       const deviceSession: DeviceSessions = {

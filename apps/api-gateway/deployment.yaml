@@ -42,6 +42,21 @@ spec:
                  secretKeyRef:
                    name: api-gateway-service-production-config-secret
                    key: SECRET
+             - name: GOOGLE_CLIENT_ID
+               valueFrom:
+                 secretKeyRef:
+                   name: api-gateway-service-production-config-secret
+                   key: GOOGLE_CLIENT_ID
+             - name: GOOGLE_CLIENT_SECRET
+               valueFrom:
+                 secretKeyRef:
+                   name: api-gateway-service-production-config-secret
+                   key: GOOGLE_CLIENT_SECRET
+             - name: RECAPTCHA_SECRET_KEY
+               valueFrom:
+                 secretKeyRef:
+                   name: api-gateway-service-production-config-secret
+                   key: RECAPTCHA_SECRET_KEY
              - name: DATABASE_URL
                valueFrom:
                  secretKeyRef:

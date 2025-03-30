@@ -9,7 +9,6 @@ export class AuthQueryRepository {
 
   async getSessions(userId: string): Promise<Result<any>> {
     try {
-      debugger;
       const sessions = await this.prisma.deviceSessions.findMany({
         where: {
           userId: userId,
@@ -68,6 +67,48 @@ export class AuthQueryRepository {
       return {
         success: false,
         message: formatErrorMessage(error, 'failed database query'),
+        data: [],
+      };
+    }
+  }
+
+  async getAccount(email: string) {
+    try {
+      const account = await this.prisma.account.findFirst({
+        where: {
+          OR: [
+            {
+              GithubUser: {
+                email: email,
+              },
+            },
+            {
+              GooglebUser: {
+                email: email,
+              },
+            },
+          ],
+        },
+        include: {
+          user: true,
+          GithubUser: true,
+          GooglebUser: true,
+        },
+      });
+
+      if (!account) {
+        throw new Error();
+      }
+      return {
+        success: true,
+        message:
+          'successful receipt of information on accounts in the database',
+        data: [account],
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: '',
         data: [],
       };
     }
