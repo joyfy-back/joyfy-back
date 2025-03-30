@@ -16,6 +16,7 @@ export class CreateUserCommand {
     public password: string,
     public agreeToTerms: boolean,
     public passwordConfirmation: string,
+    public accounts: any,
   ) {}
 }
 
@@ -25,7 +26,7 @@ export class CreateUserUseCase implements ICommandHandler<CreateUserCommand> {
     protected emailService: EmailService,
     protected authRepository: AuthRepository,
   ) {}
-  async execute(dto: UserCreateInputDto): Promise<Result<UserMapOutput>> {
+  async execute(dto: CreateUserCommand): Promise<Result<UserMapOutput>> {
     try {
       const passwordHash = await hash(dto.password);
 
@@ -45,7 +46,10 @@ export class CreateUserUseCase implements ICommandHandler<CreateUserCommand> {
         agreeToTerms: dto.agreeToTerms,
       };
 
-      const user: Result<any> = await this.authRepository.createUser(newUser);
+      const user: Result<any> = await this.authRepository.createUser(
+        newUser,
+        dto.accounts,
+      );
 
       if (!user.success) {
         throw new Error();
