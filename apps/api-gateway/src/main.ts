@@ -40,6 +40,7 @@ async function bootstrap() {
     res.json(document);
   });
 
+  console.log(document,"documentdocumentdocumentdocument")
   const configService = app.get(ConfigService<ConfigurationType, true>);
   const apiSettings = configService.get('apiSettings', { infer: true });
 
