@@ -11,32 +11,8 @@
         "includeFiles": [
           "dist/**",
           "prisma/**",
-          "node_modules/.prisma/**",
-          "apps/api-gateway/src/swagger-ui-assets/**"
+          "node_modules/.prisma/**"
         ]
-      }
-    }
-  ],
-  "routes": [
-    {
-      "src": "/api/v1/swagger",
-      "dest": "dist/apps/api-gateway/main.js"
-    },
-    {
-      "src": "/api/v1/swagger-json",
-      "dest": "dist/apps/api-gateway/main.js"
-    },
-    {
-      "src": "/api/v1/(.*)",
-      "dest": "dist/apps/api-gateway/main.js"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "dist/apps/api-gateway/main.js",
-      "headers": {
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Methods": "GET,POST,PUT,DELETE,OPTIONS",
-        "Access-Control-Allow-Headers": "Content-Type,Authorization"
       }
     }
   ],
@@ -48,6 +24,33 @@
     {
       "source": "/api/v1/swagger-json",
       "destination": "/api/v1/swagger-json"
+    },
+    {
+      "source": "/api/v1/(.*)",
+      "destination": "/api/v1/(.*)"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        },
+        {
+          "key": "Access-Control-Allow-Methods",
+          "value": "GET,POST,PUT,DELETE,OPTIONS"
+        },
+        {
+          "key": "Access-Control-Allow-Headers",
+          "value": "Content-Type,Authorization"
+        }
+      ]
     }
   ]
 }
