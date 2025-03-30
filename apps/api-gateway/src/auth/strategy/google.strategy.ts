@@ -9,8 +9,8 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
     const apiSettings = configService.get('apiSettings', { infer: true });
 
     const settingsGitHub = {
-      clientID: apiSettings.GOOGLE_CLIENT_ID,
-      clientSecret: apiSettings.GOOGLE_CLIENT_SECRET,
+      clientID: apiSettings.GOOGLE_CLIENT_ID || 'null',
+      clientSecret: apiSettings.GOOGLE_CLIENT_SECRET || 'null',
       scope: ['user:email'],
     };
     super(settingsGitHub);

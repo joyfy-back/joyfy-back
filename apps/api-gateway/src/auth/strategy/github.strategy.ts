@@ -9,9 +9,9 @@ export class GithubStrategy extends PassportStrategy(Strategy, 'github') {
     const apiSettings = configService.get('apiSettings', { infer: true });
 
     const settingsGitHub = {
-      clientID: apiSettings.GITHUB_CLIENT_ID,
-      clientSecret: apiSettings.GITHUB_CLIENT_SECRET,
-      callbackURL: apiSettings.GITHUB_CALLBACK_URL,
+      clientID: apiSettings.GITHUB_CLIENT_ID || 'null',
+      clientSecret: apiSettings.GITHUB_CLIENT_SECRET  || 'null',
+      callbackURL: apiSettings.GITHUB_CALLBACK_URL  || 'null',
       scope: ['user:email'],
     };
     console.log(settingsGitHub,'settingsGitHubsettingsGitHub')
