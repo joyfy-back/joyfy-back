@@ -15,7 +15,7 @@
     "start:dev:test": "cross-env ENV=TEST nest start --watch",
     "start:prod": "node dist/apps/api-gateway/main",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
-    "test": "jest",
+    "test:unit": "npx cross-env ENV=TEST jest --config ./apps/api-gateway/test/jest-unit.json",
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
