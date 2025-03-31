@@ -1,12 +1,14 @@
 import { Test } from '@nestjs/testing';
-import { EmailService } from '../../src/auth/application/email.service' 
-import { AuthRepository } from '../../src/auth/infrastructure/auth.repository'
+import { EmailService } from '../../src/auth/application/email.service';
+import { AuthRepository } from '../../src/auth/infrastructure/auth.repository';
 import { randomUUID } from 'crypto';
 
 // Мокируем nodemailer
 jest.mock('nodemailer', () => ({
   createTransport: jest.fn().mockReturnValue({
-    sendMail: jest.fn().mockImplementation((options) => Promise.resolve(options)),
+    sendMail: jest
+      .fn()
+      .mockImplementation((options) => Promise.resolve(options)),
   }),
 }));
 
@@ -42,7 +44,10 @@ describe('EmailService', () => {
 
   describe('sendEmail', () => {
     it('should send registration email', async () => {
-      const result = await emailService.sendEmail('test-code', 'user@example.com');
+      const result = await emailService.sendEmail(
+        'test-code',
+        'user@example.com',
+      );
 
       expect(result).toEqual({
         from: 'Joyfy <no-reply@joyfy.online>',
@@ -232,7 +237,9 @@ describe('EmailService', () => {
     });
 
     it('should handle errors during resend', async () => {
-      mockAuthRepository.findBlogOrEmail.mockRejectedValue(new Error('DB error'));
+      mockAuthRepository.findBlogOrEmail.mockRejectedValue(
+        new Error('DB error'),
+      );
 
       const result = await emailService.resendCode('user@example.com');
 

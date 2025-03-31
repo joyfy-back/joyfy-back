@@ -3,4 +3,4 @@ export const SWAGGER_DESCRIPTION =
 
 export const SWAGGER_TITLE = 'Joyfy – Social Media API';
 
-export const SWAGGER_SERVER = 'https://gateway.joyfy.online/api/v1'
+export const SWAGGER_SERVER = 'https://gateway.joyfy.online/api/v1';

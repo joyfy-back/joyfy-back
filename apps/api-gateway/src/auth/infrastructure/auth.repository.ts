@@ -32,11 +32,10 @@ export class AuthRepository {
         },
       });
 
-      
       if (!account.isWasRegistered) {
         await this.prisma.account.create({
           data: {
-            userId: user.userId, 
+            userId: user.userId,
           },
         });
       } else {
