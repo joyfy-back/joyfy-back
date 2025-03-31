@@ -4,6 +4,11 @@ import { ApiGatewayModule } from './api-gateway.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ConfigService } from '@nestjs/config';
 import { ConfigurationType } from './configs/configuration';
+import {
+  SWAGGER_DESCRIPTION,
+  SWAGGER_SERVER,
+  SWAGGER_TITLE,
+} from './shared/constants/swagger';
 
 async function bootstrap() {
   const app = await NestFactory.create(ApiGatewayModule);
@@ -15,29 +20,25 @@ async function bootstrap() {
   });
 
   const config = new DocumentBuilder()
-    .setTitle('My API') // Заголовок API
-    .setDescription('The API description')
-    .setVersion('1.0') // Версия API
+    .setTitle(SWAGGER_TITLE)
+    .setDescription(SWAGGER_DESCRIPTION)
+    .setVersion('1.0')
+    .addServer(SWAGGER_SERVER)
     .addBearerAuth()
     .build();
 
-
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api/v1/swagger', app, document, {  // Добавлен префикс /api/v1
-    customCssUrl: 'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.15.5/swagger-ui.min.css',
+  SwaggerModule.setup('api/v1/swagger', app, document, {
+    customCssUrl:
+      'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.15.5/swagger-ui.min.css',
     customJs: [
       'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.15.5/swagger-ui-bundle.js',
       'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.15.5/swagger-ui-standalone-preset.js',
     ],
     swaggerOptions: {
-      url: '/api/v1/swagger-json',  // Явное указание URL для JSON
+      url: '/api/v1/swagger-json',
       persistAuthorization: true,
-    }
-  });
-
-  // Добавьте этот endpoint для сырого JSON
-  app.use('/api/v1/swagger-json', (req, res) => {
-    res.json(document);
+    },
   });
 
   const configService = app.get(ConfigService<ConfigurationType, true>);
