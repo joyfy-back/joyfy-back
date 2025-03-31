@@ -14,7 +14,6 @@ export class GithubStrategy extends PassportStrategy(Strategy, 'github') {
       callbackURL: apiSettings.GITHUB_CALLBACK_URL  || 'null',
       scope: ['user:email'],
     };
-    console.log(settingsGitHub,'settingsGitHubsettingsGitHub')
     super(settingsGitHub);
   }
 
