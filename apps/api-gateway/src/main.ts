@@ -4,6 +4,11 @@ import { ApiGatewayModule } from './api-gateway.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ConfigService } from '@nestjs/config';
 import { ConfigurationType } from './configs/configuration';
+import {
+  SWAGGER_DESCRIPTION,
+  SWAGGER_SERVER,
+  SWAGGER_TITLE,
+} from './shared/constants/swagger';
 
 async function bootstrap() {
   const app = await NestFactory.create(ApiGatewayModule);
@@ -15,10 +20,10 @@ async function bootstrap() {
   });
 
   const config = new DocumentBuilder()
-    .setTitle('My API')
-    .setDescription('The API description')
+    .setTitle(SWAGGER_TITLE)
+    .setDescription(SWAGGER_DESCRIPTION)
     .setVersion('1.0')
-    .addServer('https://gateway.joyfy.online/api/v1')
+    .addServer(SWAGGER_SERVER)
     .addBearerAuth()
     .build();
 
