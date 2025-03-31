@@ -8,11 +8,7 @@
       "config": {
         "buildCommand": "npm run buildvercel",
         "startCommand": "npm run start:prod",
-        "includeFiles": [
-          "dist/**",
-          "prisma/**",
-          "node_modules/.prisma/**"
-        ]
+        "includeFiles": ["dist/**", "prisma/**", "node_modules/.prisma/**"]
       }
     }
   ],

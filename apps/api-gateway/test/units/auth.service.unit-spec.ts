@@ -1,8 +1,8 @@
 import { Test } from '@nestjs/testing';
 import { JwtService } from '@nestjs/jwt';
 import { verify } from 'argon2';
-import { AuthService } from '../../src/auth/application/auth.service' 
-import { AuthRepository } from '../../src/auth/infrastructure/auth.repository'
+import { AuthService } from '../../src/auth/application/auth.service';
+import { AuthRepository } from '../../src/auth/infrastructure/auth.repository';
 jest.mock('argon2', () => ({
   verify: jest.fn(),
 }));
@@ -49,11 +49,16 @@ describe('AuthService', () => {
         data: [],
       });
 
-      const result = await authService.checkCredentials('nonexistent@test.com', 'password');
+      const result = await authService.checkCredentials(
+        'nonexistent@test.com',
+        'password',
+      );
 
       expect(result.success).toBe(false);
       expect(result.message).toContain('no such email');
-      expect(authRepository.findIsEmail).toHaveBeenCalledWith('nonexistent@test.com');
+      expect(authRepository.findIsEmail).toHaveBeenCalledWith(
+        'nonexistent@test.com',
+      );
     });
 
     it('should return failure if password is invalid', async () => {
@@ -67,7 +72,10 @@ describe('AuthService', () => {
       });
       (verify as jest.Mock).mockResolvedValue(false);
 
-      const result = await authService.checkCredentials('valid@test.com', 'wrong_password');
+      const result = await authService.checkCredentials(
+        'valid@test.com',
+        'wrong_password',
+      );
 
       expect(result.success).toBe(false);
       expect(result.message).toContain('password is incorrect');
@@ -87,7 +95,10 @@ describe('AuthService', () => {
       });
       (verify as jest.Mock).mockResolvedValue(true);
 
-      const result = await authService.checkCredentials('valid@test.com', 'correct_password');
+      const result = await authService.checkCredentials(
+        'valid@test.com',
+        'correct_password',
+      );
 
       expect(result.success).toBe(true);
       expect(result.message).toContain('correct');
@@ -101,7 +112,10 @@ describe('AuthService', () => {
         throw new Error('Invalid token');
       });
 
-      const result = await authService.checkValidateUserSessionByRefreshToken('invalid_token');
+      const result =
+        await authService.checkValidateUserSessionByRefreshToken(
+          'invalid_token',
+        );
 
       expect(result.success).toBe(false);
       expect(result.message).toContain('Invalid token');
@@ -120,7 +134,8 @@ describe('AuthService', () => {
         data: [],
       });
 
-      const result = await authService.checkValidateUserSessionByRefreshToken('valid_token');
+      const result =
+        await authService.checkValidateUserSessionByRefreshToken('valid_token');
 
       expect(result.success).toBe(false);
       expect(authRepository.findRottenSessions).toHaveBeenCalledWith(
@@ -133,7 +148,7 @@ describe('AuthService', () => {
       const mockDecodedToken = {
         userId: 1,
         deviceId: 'device123',
-        iat: 1000, 
+        iat: 1000,
       };
 
       const mockSession = {
@@ -146,7 +161,8 @@ describe('AuthService', () => {
         data: [mockSession],
       });
 
-      const result = await authService.checkValidateUserSessionByRefreshToken('valid_token');
+      const result =
+        await authService.checkValidateUserSessionByRefreshToken('valid_token');
 
       expect(result.success).toBe(false);
     });
@@ -155,11 +171,11 @@ describe('AuthService', () => {
       const mockDecodedToken = {
         userId: 1,
         deviceId: 'device123',
-        iat: 2000, 
+        iat: 2000,
       };
 
       const mockSession = {
-        lastActiveDate: 1000, 
+        lastActiveDate: 1000,
       };
 
       mockJwtService.verify.mockReturnValue(mockDecodedToken);
@@ -168,7 +184,8 @@ describe('AuthService', () => {
         data: [mockSession],
       });
 
-      const result = await authService.checkValidateUserSessionByRefreshToken('valid_token');
+      const result =
+        await authService.checkValidateUserSessionByRefreshToken('valid_token');
 
       expect(result.success).toBe(true);
       expect(result.data[0]).toEqual(mockDecodedToken);
@@ -193,7 +210,9 @@ describe('AuthService', () => {
       };
 
       mockJwtService.sign.mockImplementation((body, options) => {
-        return options?.expiresIn ? mockTokens.refreshToken : mockTokens.accessToken;
+        return options?.expiresIn
+          ? mockTokens.refreshToken
+          : mockTokens.accessToken;
       });
       mockJwtService.decode.mockReturnValue(mockDecodedToken);
 
@@ -201,7 +220,9 @@ describe('AuthService', () => {
 
       expect(result).toEqual(mockTokens);
       expect(jwtService.sign).toHaveBeenCalledWith(mockPayload);
-      expect(jwtService.sign).toHaveBeenCalledWith(mockPayload, { expiresIn: '1h' });
+      expect(jwtService.sign).toHaveBeenCalledWith(mockPayload, {
+        expiresIn: '1h',
+      });
       expect(authRepository.updateSession).toHaveBeenCalledWith(
         mockDecodedToken.iat,
         mockPayload.userId,
@@ -219,7 +240,9 @@ describe('AuthService', () => {
       const result = await authService.checkPasswordRecovery('invalid_code');
 
       expect(result.success).toBe(false);
-      expect(authRepository.checkPasswordRecoveryCode).toHaveBeenCalledWith('invalid_code');
+      expect(authRepository.checkPasswordRecoveryCode).toHaveBeenCalledWith(
+        'invalid_code',
+      );
     });
 
     it('should return success if recovery code is valid', async () => {

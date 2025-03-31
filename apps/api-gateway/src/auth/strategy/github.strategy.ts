@@ -10,8 +10,8 @@ export class GithubStrategy extends PassportStrategy(Strategy, 'github') {
 
     const settingsGitHub = {
       clientID: apiSettings.GITHUB_CLIENT_ID || 'null',
-      clientSecret: apiSettings.GITHUB_CLIENT_SECRET  || 'null',
-      callbackURL: apiSettings.GITHUB_CALLBACK_URL  || 'null',
+      clientSecret: apiSettings.GITHUB_CLIENT_SECRET || 'null',
+      callbackURL: apiSettings.GITHUB_CALLBACK_URL || 'null',
       scope: ['user:email'],
     };
     super(settingsGitHub);
@@ -25,9 +25,8 @@ export class GithubStrategy extends PassportStrategy(Strategy, 'github') {
         email: profile.emails?.[0]?.value,
         accessToken,
       };
-  
     } catch (error) {
-      console.log(error)
+      console.log(error);
     }
   }
 }

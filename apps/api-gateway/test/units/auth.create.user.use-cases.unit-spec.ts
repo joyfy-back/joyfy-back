@@ -2,12 +2,21 @@ import { Test } from '@nestjs/testing';
 import { JwtService } from '@nestjs/jwt';
 import { hash } from 'argon2';
 import { randomUUID } from 'crypto';
-import { CreateAccountUserGithubCommand, CreateAccountUserGithubUseCase } from '../../src/auth/application/use-cases/create-account.user.github.use-case';
-import { CreateAccountUserGoogleCommand, CreateAccountUserGoogleUseCase } from '../../src/auth/application/use-cases/create-account.user.google.use-case';
-import { CreateUserCommand, CreateUserUseCase } from '../../src/auth/application/use-cases/create-user.use-case';
+import {
+  CreateAccountUserGithubCommand,
+  CreateAccountUserGithubUseCase,
+} from '../../src/auth/application/use-cases/create-account.user.github.use-case';
+import {
+  CreateAccountUserGoogleCommand,
+  CreateAccountUserGoogleUseCase,
+} from '../../src/auth/application/use-cases/create-account.user.google.use-case';
+import {
+  CreateUserCommand,
+  CreateUserUseCase,
+} from '../../src/auth/application/use-cases/create-user.use-case';
 import { AuthRepository } from '../../src/auth/infrastructure/auth.repository';
 import { EmailService } from '../../src/auth/application/email.service';
-import { Result } from  '../../../../libs/shared/types';
+import { Result } from '../../../../libs/shared/types';
 
 jest.mock('argon2', () => ({
   hash: jest.fn().mockResolvedValue('hashed-password'),
@@ -52,8 +61,12 @@ describe('Auth Use Cases', () => {
       ],
     }).compile();
 
-    githubUseCase = moduleRef.get<CreateAccountUserGithubUseCase>(CreateAccountUserGithubUseCase);
-    googleUseCase = moduleRef.get<CreateAccountUserGoogleUseCase>(CreateAccountUserGoogleUseCase);
+    githubUseCase = moduleRef.get<CreateAccountUserGithubUseCase>(
+      CreateAccountUserGithubUseCase,
+    );
+    googleUseCase = moduleRef.get<CreateAccountUserGoogleUseCase>(
+      CreateAccountUserGoogleUseCase,
+    );
     createUserUseCase = moduleRef.get<CreateUserUseCase>(CreateUserUseCase);
     authRepository = moduleRef.get<AuthRepository>(AuthRepository);
     emailService = moduleRef.get<EmailService>(EmailService);
@@ -65,23 +78,27 @@ describe('Auth Use Cases', () => {
     const command = new CreateAccountUserGithubCommand(
       'github@example.com',
       'githubuser',
-      '123456'
+      '123456',
     );
 
     it('should successfully create GitHub user', async () => {
-        //@ts-ignore
+      //@ts-ignore
       const mockResult: Result<any> = {
         success: true,
         data: [{ id: '1', email: 'github@example.com' }],
       };
 
-      mockAuthRepository.createAccountAndGithubUser.mockResolvedValue(mockResult);
+      mockAuthRepository.createAccountAndGithubUser.mockResolvedValue(
+        mockResult,
+      );
 
       const result = await githubUseCase.execute(command);
 
       expect(result.success).toBe(true);
       expect(result.message).toBe('the user was created successfully');
-      expect(authRepository.createAccountAndGithubUser).toHaveBeenCalledWith(command);
+      expect(authRepository.createAccountAndGithubUser).toHaveBeenCalledWith(
+        command,
+      );
     });
 
     it('should handle repository failure', async () => {
@@ -96,7 +113,9 @@ describe('Auth Use Cases', () => {
     });
 
     it('should handle unexpected errors', async () => {
-      mockAuthRepository.createAccountAndGithubUser.mockRejectedValue(new Error('DB error'));
+      mockAuthRepository.createAccountAndGithubUser.mockRejectedValue(
+        new Error('DB error'),
+      );
 
       const result = await githubUseCase.execute(command);
 
@@ -110,23 +129,27 @@ describe('Auth Use Cases', () => {
       'google@example.com',
       'googleuser',
       'google123',
-      'avatar.jpg'
+      'avatar.jpg',
     );
 
     it('should successfully create Google user', async () => {
-        //@ts-ignore
+      //@ts-ignore
       const mockResult: Result<any> = {
         success: true,
         data: [{ id: '2', email: 'google@example.com' }],
       };
 
-      mockAuthRepository.createAccountAndGoogleUser.mockResolvedValue(mockResult);
+      mockAuthRepository.createAccountAndGoogleUser.mockResolvedValue(
+        mockResult,
+      );
 
       const result = await googleUseCase.execute(command);
 
       expect(result.success).toBe(true);
       expect(result.message).toBe('the user was created successfully');
-      expect(authRepository.createAccountAndGoogleUser).toHaveBeenCalledWith(command);
+      expect(authRepository.createAccountAndGoogleUser).toHaveBeenCalledWith(
+        command,
+      );
     });
 
     it('should handle repository failure', async () => {
@@ -141,7 +164,9 @@ describe('Auth Use Cases', () => {
     });
 
     it('should handle unexpected errors', async () => {
-      mockAuthRepository.createAccountAndGoogleUser.mockRejectedValue(new Error('DB error'));
+      mockAuthRepository.createAccountAndGoogleUser.mockRejectedValue(
+        new Error('DB error'),
+      );
 
       const result = await googleUseCase.execute(command);
 
@@ -157,7 +182,7 @@ describe('Auth Use Cases', () => {
       'password123',
       true,
       'password123',
-      []
+      [],
     );
 
     it('should successfully create user', async () => {
@@ -180,7 +205,10 @@ describe('Auth Use Cases', () => {
       expect(result.success).toBe(true);
       expect(result.message).toBe('the user was created successfully');
       expect(authRepository.createUser).toHaveBeenCalled();
-      expect(emailService.sendEmail).toHaveBeenCalledWith('mocked-uuid', 'user@example.com');
+      expect(emailService.sendEmail).toHaveBeenCalledWith(
+        'mocked-uuid',
+        'user@example.com',
+      );
       expect(hash).toHaveBeenCalledWith('password123');
       expect(randomUUID).toHaveBeenCalled();
     });

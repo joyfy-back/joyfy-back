@@ -13,6 +13,7 @@ export class LoginUserCommand {
     public userName: string,
     public userAgent: string,
     public ip: string,
+    public email: string,
   ) {}
 }
 
@@ -30,6 +31,7 @@ export class LoginUserUseCase implements ICommandHandler<LoginUserCommand> {
         userName: dto.userName,
         userId: dto.userId,
         deviceId: deviceId,
+        email: dto.email,
       };
 
       const tokens = {

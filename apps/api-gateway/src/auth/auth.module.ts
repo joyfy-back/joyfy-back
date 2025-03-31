@@ -45,7 +45,7 @@ const useCaseAuth = [
   DeleteByIdSessionCommand,
   DeleteByIdUseCase,
   CreateAccountUserGithubUseCase,
-  CreateAccountUserGoogleUseCase
+  CreateAccountUserGoogleUseCase,
 ];
 const strategys = [JwtStrategy, GithubStrategy, GoogleStrategy];
 

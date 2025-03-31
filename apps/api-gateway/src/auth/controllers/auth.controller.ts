@@ -17,6 +17,7 @@ import { CommandBus } from '@nestjs/cqrs';
 import { TokensType } from '../type/auth.type';
 import { Result } from 'apps/api-gateway/generalTypes/errorResponseType';
 import { AuthService } from '../application/auth.service';
+import { UserResponseDto } from '../dto/output-dto/user-response.dto';
 import {
   ApiBearerAuth,
   ApiBody,
@@ -55,7 +56,7 @@ export class AuthController {
     protected authQueryRepository: AuthQueryRepository,
     protected jwtService: JwtService,
     protected recaptchaService: RecaptchaService,
-  ) { }
+  ) {}
 
   @Post('registration')
   @HttpCode(201)
@@ -154,6 +155,7 @@ export class AuthController {
         checkCredentials.data[0].username,
         userAgent,
         req.ip,
+        dto.Email,
       ),
     );
 
@@ -191,21 +193,42 @@ export class AuthController {
     );
   }
 
-  @Post('refresh-token')
-  @HttpCode(200)
-  @ApiOperation({ 
-    summary: 'Refresh access token', 
-    description: 'Generates new access token using refresh token from cookies. Refresh token must be sent in HttpOnly cookie.' 
+  @Get('me')
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({
+    summary: 'Get current user info',
+    description: 'Returns authenticated user information',
   })
   @ApiBearerAuth()
-  @ApiResponse({ 
-    status: 200, 
+  @ApiResponse({
+    status: 200,
+    description: 'User information',
+    type: UserResponseDto,
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized - invalid access token',
+  })
+  async getUser(@Res() res: Response, @Request() req) {
+    return res.json(req.user);
+  }
+
+  @Post('refresh-token')
+  @HttpCode(200)
+  @ApiOperation({
+    summary: 'Refresh access token',
+    description:
+      'Generates new access token using refresh token from cookies. Refresh token must be sent in HttpOnly cookie.',
+  })
+  @ApiBearerAuth()
+  @ApiResponse({
+    status: 200,
     description: 'Returns accessToken',
     schema: {
       example: {
-        accessToken: 'dwe234324esadfa312312edsaasd'
-      }
-    }
+        accessToken: 'dwe234324esadfa312312edsaasd',
+      },
+    },
   })
   @ApiResponse({ status: 401, description: 'Unauthorized.' })
   @ApiCookieAuth('refreshToken')
@@ -269,13 +292,12 @@ export class AuthController {
     examples: {
       example: {
         value: {
-          email: "user@example.com",
-          recaptcha: "03AGdBq27Q..."
-        }
-      }
-    }
+          email: 'user@example.com',
+          recaptcha: '03AGdBq27Q...',
+        },
+      },
+    },
   })
-  
   @ApiResponse({
     status: 204,
     description: 'Password recovery email sent successfully.',
@@ -308,12 +330,12 @@ export class AuthController {
     examples: {
       example: {
         value: {
-          recoveryCode: "550e8400-e29b-41d4-a716-446655440000",
-          newPassword: "NewSecurePassword123!",
-          recaptcha: "03AGdBq27Q..."
-        }
-      }
-    }
+          recoveryCode: '550e8400-e29b-41d4-a716-446655440000',
+          newPassword: 'NewSecurePassword123!',
+          recaptcha: '03AGdBq27Q...',
+        },
+      },
+    },
   })
   @ApiResponse({ status: 204, description: 'Password updated successfully.' })
   @ApiResponse({ status: 404, description: 'User not found.' })
@@ -404,21 +426,21 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get all devices sessions' })
-  @ApiResponse({ 
-    status: 200, 
+  @ApiResponse({
+    status: 200,
     description: 'Returns all active sessions for user',
     schema: {
       example: {
         data: [
           {
-            deviceId: "string",
-            ip: "string",
-            title: "string",
-            lastActiveDate: "2023-01-01T00:00:00.000Z"
-          }
-        ]
-      }
-    }
+            deviceId: 'string',
+            ip: 'string',
+            title: 'string',
+            lastActiveDate: '2023-01-01T00:00:00.000Z',
+          },
+        ],
+      },
+    },
   })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 500, description: 'Internal Server Error' })
@@ -433,7 +455,7 @@ export class AuthController {
     }
 
     return {
-      data: sesions.data
+      data: sesions.data,
     };
   }
 
@@ -442,7 +464,10 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Terminate all sessions except current' })
-  @ApiResponse({ status: 204, description: 'All sessions deleted except current' })
+  @ApiResponse({
+    status: 204,
+    description: 'All sessions deleted except current',
+  })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 500, description: 'Internal Server Error' })
   async deleteDevices(@Request() req) {
