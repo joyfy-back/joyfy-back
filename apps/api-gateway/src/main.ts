@@ -15,29 +15,29 @@ async function bootstrap() {
   });
 
   const config = new DocumentBuilder()
-    .setTitle('My API') // Заголовок API
+    .setTitle('My API')
     .setDescription('The API description')
-    .setVersion('1.0') // Версия API
+    .setVersion('1.0')
+    .addServer('https://gateway.joyfy.online/api/v1')
     .addBearerAuth()
     .build();
 
-
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api/v1/swagger', app, document, {  // Добавлен префикс /api/v1
-    customCssUrl: 'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.15.5/swagger-ui.min.css',
+  SwaggerModule.setup('api/v1/swagger', app, document, {
+    customCssUrl:
+      'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.15.5/swagger-ui.min.css',
     customJs: [
       'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.15.5/swagger-ui-bundle.js',
       'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.15.5/swagger-ui-standalone-preset.js',
     ],
     swaggerOptions: {
-      url: '/api/v1/swagger-json',  // Явное указание URL для JSON
+      url: '/api/v1/swagger-json',
       persistAuthorization: true,
-    }
+    },
   });
 
-  // Добавьте этот endpoint для сырого JSON
-  app.use('/api/v1/swagger-json', (req, res) => {
-    res.json(document);
+  app.use('/api/v1/swagger-json', (_, res: Response) => {
+    void res.json(document);
   });
 
   const configService = app.get(ConfigService<ConfigurationType, true>);

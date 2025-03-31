@@ -12,7 +12,6 @@ import { DeleteSessionUseCase } from './application/use-cases/delete-session.use
 import { LoginUserUseCase } from './application/use-cases/login-user.use-case';
 import { PasswordRecoveryUseCase } from './application/use-cases/password-recovery.use-case';
 import { UpdatePasswordUseCase } from './application/use-cases/update-password.use-case';
-// import { GithubStrategy } from './strategy/github.strategy';
 import { JwtStrategy } from './strategy/jwt.strategy';
 import { DeleteAllSessionsExceptCurrentUseCase } from './application/use-cases/delete-all.sessions.except.current.use-case';
 import {
@@ -22,7 +21,7 @@ import {
 import { AuthQueryRepository } from './infrastructure/auth.query.repository';
 import { ConfigService } from '@nestjs/config';
 import { RecaptchaService } from './application/recaptcha.service';
-import { CreateAccountUserGithubCommand, CreateAccountUserGithubUseCase } from './application/use-cases/create-account.user.github.use-case';
+import { CreateAccountUserGithubUseCase } from './application/use-cases/create-account.user.github.use-case';
 import { GithubStrategy } from './strategy/github.strategy';
 import { GoogleStrategy } from './strategy/google.strategy';
 import { CreateAccountUserGoogleUseCase } from './application/use-cases/create-account.user.google.use-case';
@@ -70,4 +69,4 @@ const strategys = [JwtStrategy, GithubStrategy, GoogleStrategy];
   providers: [...authProviders, ...useCaseAuth, ...strategys],
   exports: [],
 })
-export class AuthModule { }
+export class AuthModule {}
