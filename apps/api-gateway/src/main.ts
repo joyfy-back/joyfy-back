@@ -36,10 +36,6 @@ async function bootstrap() {
     },
   });
 
-  app.use('/api/v1/swagger-json', (_, res: Response) => {
-    void res.json(document);
-  });
-
   const configService = app.get(ConfigService<ConfigurationType, true>);
   const apiSettings = configService.get('apiSettings', { infer: true });
 
