@@ -33,9 +33,10 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
         accessToken,
       };
 
+      console.log(user,'useruseruseruseruser')
       done(null, user);
     } catch (error) {
-      console.log(error);
+      console.log(error,'fdfdfdfd');
     }
   }
 }

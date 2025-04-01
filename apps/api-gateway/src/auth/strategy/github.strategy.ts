@@ -19,6 +19,12 @@ export class GithubStrategy extends PassportStrategy(Strategy, 'github') {
 
   async validate(accessToken: string, profile: any) {
     try {
+      console.log({
+        githubId: profile.id,
+        username: profile.username,
+        email: profile.emails?.[0]?.value,
+        accessToken,
+      }, '31232131312312312')
       return {
         githubId: profile.id,
         username: profile.username,

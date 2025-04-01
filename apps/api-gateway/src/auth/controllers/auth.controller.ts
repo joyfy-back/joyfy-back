@@ -10,6 +10,7 @@ import {
   Post,
   Request,
   Res,
+  UnauthorizedException,
   UseGuards,
 } from '@nestjs/common';
 import { Response } from 'express';
@@ -56,7 +57,7 @@ export class AuthController {
     protected authQueryRepository: AuthQueryRepository,
     protected jwtService: JwtService,
     protected recaptchaService: RecaptchaService,
-  ) {}
+  ) { }
 
   @Post('registration')
   @HttpCode(201)
@@ -362,65 +363,98 @@ export class AuthController {
   @UseGuards(AuthGuard('github'))
   @ApiExcludeEndpoint()
   async githubCallback(@Request() req, @Res() res: Response) {
-    const user = req.user;
+    try {
+      const user = req.user;
 
-    const result = await this.commandBuse.execute(
-      new CreateAccountUserGithubCommand(
-        req.user.email,
-        req.user.username,
-        req.user.githubId,
-      ),
-    );
+      if (!req.user) {
+        throw new UnauthorizedException('GitHub authentication failed');
+      }
 
-    if (!result.success) {
-      throw new HttpException(
-        `${result.message}`,
-        HttpStatus.INTERNAL_SERVER_ERROR,
+
+
+      const result = await this.commandBuse.execute(
+        new CreateAccountUserGithubCommand(
+          req.user.email,
+          req.user.username,
+          req.user.githubId,
+        ),
       );
+
+      console.log(result.success, 'fdresult.successresult.success')
+      if (!result.success) {
+        throw new HttpException(
+          `${result.message}`,
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        );
+      }
+
+      const token = this.jwtService.sign({
+        id: user.githubId,
+        username: user.username,
+      });
+
+      return res.redirect(
+        `https://joyfy.online/auth/github/login-success?token=${token}`,
+      );
+
+    } catch (error) {
+      console.error('GitHub auth error:', error);
+      return res.redirect('https://joyfy.online/auth/login?error=github_failed');
+
     }
 
-    const token = this.jwtService.sign({
-      id: user.githubId,
-      username: user.username,
-    });
-
-    return res.redirect(
-      `https://joyfy.online/auth/github/login-success?token=${token}`,
-    );
   }
 
   @Get('google/callback')
   @UseGuards(AuthGuard('google'))
   @ApiExcludeEndpoint()
   async googleCallback(@Request() req, @Res() res: Response) {
-    const user = req.user;
+    try {
+      const user = req.user;
 
-    const result = await this.commandBuse.execute(
-      new CreateAccountUserGoogleCommand(
-        req.user.email,
-        req.user.username,
-        req.user.googleId,
-        req.user.avatar,
-      ),
-    );
-
-    if (!result.success) {
-      throw new HttpException(
-        `${result.message}`,
-        HttpStatus.INTERNAL_SERVER_ERROR,
+      const result = await this.commandBuse.execute(
+        new CreateAccountUserGoogleCommand(
+          req.user.email,
+          req.user.username,
+          req.user.googleId,
+          req.user.avatar,
+        ),
       );
+
+      console.log(result)
+  
+      if (!result.success) {
+        throw new HttpException(
+          `${result.message}`,
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        );
+      }
+  
+      const token = this.jwtService.sign({
+        id: user.googleId,
+        username: user.username,
+      });
+  
+      return res.redirect(
+        `https://joyfy.online/auth/google/login-success?token=${token}`,
+      );
+  
+      
+    } catch (error) {
+
+      console.log(error,'fdfsdfsdfsd')
+      return res.redirect(
+        `https://joyfy.online/auth/google/login-success`,
+      ); 
+      
     }
-
-    const token = this.jwtService.sign({
-      id: user.googleId,
-      username: user.username,
-    });
-
-    return res.redirect(
-      `https://joyfy.online/auth/google/login-success?token=${token}`,
-    );
   }
 
+  // @Get('github/login')
+  // redirectToGithub() {
+  //   const url = `https://github.com/login/oauth/authorize?client_id=Ov23liPxMZWmUzkdHUPV&redirect_uri=https://gateway.joyfy.online/api/v1/auth/github/callback`;
+  //   return { url };
+  // }
   @Get('devices')
   @HttpCode(200)
   @UseGuards(JwtAuthGuard)
