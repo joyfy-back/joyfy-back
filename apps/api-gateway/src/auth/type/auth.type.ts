@@ -49,3 +49,8 @@ export type GithubType = {
   username: string;
   email: string;
 };
+
+export type ParamQueryType = {
+  clientid: string;
+  redirecturi: string;
+};
