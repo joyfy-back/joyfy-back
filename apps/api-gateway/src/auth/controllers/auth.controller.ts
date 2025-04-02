@@ -10,6 +10,7 @@ import {
   Post,
   Request,
   Res,
+  UnauthorizedException,
   UseGuards,
 } from '@nestjs/common';
 import { Response } from 'express';
@@ -46,6 +47,7 @@ import { JwtService } from '@nestjs/jwt';
 import { CreateAccountUserGithubCommand } from '../application/use-cases/create-account.user.github.use-case';
 import { CreateAccountUserGoogleCommand } from '../application/use-cases/create-account.user.google.use-case';
 import { RecaptchaService } from '../application/recaptcha.service';
+import axios from 'axios';
 
 @Controller('auth')
 export class AuthController {
@@ -362,15 +364,88 @@ export class AuthController {
   @UseGuards(AuthGuard('github'))
   @ApiExcludeEndpoint()
   async githubCallback(@Request() req, @Res() res: Response) {
-    const user = req.user;
+    try {
+      const userAgent = req.headers['user-agent'] || 'unknown device';
 
-    const result = await this.commandBuse.execute(
-      new CreateAccountUserGithubCommand(
-        req.user.email,
-        req.user.username,
-        req.user.githubId,
-      ),
-    );
+      if (!req.user) {
+        throw new UnauthorizedException('GitHub authentication failed');
+      }
+      const result = await this.commandBuse.execute(
+        new CreateAccountUserGithubCommand(
+          req.user.email,
+          req.user.username,
+          req.user.githubId,
+        ),
+      );
+
+      if (!result.success) {
+        throw new HttpException(
+          `${result.message}`,
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        );
+      }
+
+      const tokens: Result<TokensType> = await this.commandBuse.execute(
+        new LoginUserCommand(
+          req.user.githubId,
+          req.user.username,
+          userAgent,
+          req.ip,
+          req.user.email,
+        ),
+      );
+
+      const accessToken = tokens.data[0].accessToken;
+
+      res.cookie('refreshToken', tokens.data[0].refreshToken, {
+        httpOnly: true,
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+        sameSite: 'strict',
+      });
+
+      res.redirect(307, 'http://localhost:3000/auth/github/login-success');
+      return res.json({ accessToken });
+    } catch (error) {
+      console.error('GitHub auth error:', error);
+      return res.redirect(
+        'http://localhost:3000/auth/login?error=github_failed',
+      );
+    }
+  }
+
+  @Get('github')
+  @HttpCode(302)
+  @ApiOperation({
+    summary: 'Initiate GitHub OAuth flow',
+    description:
+      'Redirects user to GitHub for authentication. After successful login, GitHub will redirect back to the callback URL.',
+  })
+  @ApiResponse({
+    status: 302,
+    description:
+      'Redirects user to GitHub OAuth page for authentication. After successful login on GitHub, user will be redirected to `${base_url}auth/github/login-success` with access token in response and refresh token set in HttpOnly cookie. If authentication fails, user will be redirected to `${base_url}auth/login.',
+    headers: {
+      Location: {
+        description: 'GitHub OAuth URL',
+        schema: {
+          type: 'string',
+          example: 'https://github.com/login/oauth/authorize?client_id=...',
+        },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 500,
+    description: 'Internal server error',
+    schema: {
+      example: {
+        statusCode: 500,
+        message: 'Authorization URL not found',
+      },
+    },
+  })
+  async gitOauthGitHub(@Request() req, @Res() res: Response) {
+    const result = await this.authService.getOauthGitHub(true);
 
     if (!result.success) {
       throw new HttpException(
@@ -378,17 +453,14 @@ export class AuthController {
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
-
-    const token = this.jwtService.sign({
-      id: user.githubId,
-      username: user.username,
-    });
-
-    return res.redirect(
-      `https://joyfy.online/auth/github/login-success?token=${token}`,
-    );
+    if (!result.data) {
+      throw new HttpException(
+        'Authorization URL not found',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+    return res.redirect(result.data.authUrl);
   }
-
   @Get('google/callback')
   @UseGuards(AuthGuard('google'))
   @ApiExcludeEndpoint()

@@ -256,13 +256,17 @@ export class AuthRepository {
 
   async addSessionUser(inputModul: DeviceSessions): Promise<Result<never>> {
     try {
+      const existingUser = await this.prisma.user.findUnique({
+        where: { userId: inputModul.userId || undefined },
+      });
+
       await this.prisma.deviceSessions.create({
         data: {
           deviceId: inputModul.deviceId,
           ip: inputModul.ip,
           lastActiveDate: inputModul.lastActiveDate.toString(),
           title: inputModul.title,
-          userId: inputModul.userId,
+          userId: existingUser ? inputModul.userId : null,
         },
       });
 

@@ -36,7 +36,7 @@ model Account {
 model GithubUser {
   githubId  String  @unique
   username  String
-  email     String  
+  email     String
   accountId String  @unique
   account   Account @relation(fields: [accountId], references: [accountId], onDelete: Cascade)
 
@@ -46,7 +46,7 @@ model GithubUser {
 model GoogleUser {
   googleId  String  @unique
   username  String
-  email     String  
+  email     String
   avatar    String
   accountId String  @unique
   account   Account @relation(fields: [accountId], references: [accountId], onDelete: Cascade)
@@ -66,12 +66,12 @@ model EmailConfirmation {
 }
 
 model DeviceSessions {
-  deviceId       String @id
+  deviceId       String  @id
   ip             String
   lastActiveDate String
   title          String
-  userId         String
-  user           User   @relation(fields: [userId], references: [userId], onDelete: Cascade)
+  userId         String?
+  user           User?   @relation(fields: [userId], references: [userId], onDelete: SetNull)
 
   @@map("device_sessions")
 }

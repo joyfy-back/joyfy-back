@@ -1,16 +1,21 @@
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import * as crypto from 'crypto';
 import { User } from '@prisma/client';
 import { verify } from 'argon2';
 import { AuthRepository } from '../infrastructure/auth.repository';
 import { formatErrorMessage } from '../../shared/libs/format-error-message';
 import { Result } from 'libs/shared/types';
+import { ConfigService } from '@nestjs/config';
+import axios from 'axios';
+import { ParamQueryType } from '../type/auth.type';
 
 @Injectable()
 export class AuthService {
   constructor(
     protected authRepository: AuthRepository,
     protected jwtService: JwtService,
+    protected configService: ConfigService,
   ) {}
 
   async checkCredentials(
@@ -115,6 +120,39 @@ export class AuthService {
         success: false,
         message: '',
         data: [],
+      };
+    }
+  }
+  async getOauthGitHub(isLocalHost: boolean) {
+    try {
+      const state = crypto.randomBytes(16).toString('hex');
+      const scope = 'user:email read:user';
+
+      const params = {
+        client_id: isLocalHost
+          ? 'Ov23linfRpuNdG9dqBPE'
+          : this.configService.get('apiSettings.GITHUB_CLIENT_ID'),
+        redirect_uri: isLocalHost
+          ? 'http://localhost:3000/api/v1/auth/github/callback'
+          : this.configService.get('apiSettings.GITHUB_CALLBACK_URL'),
+        scope: scope,
+        state: state,
+      };
+
+      // Формируем URL для перенаправления
+      const authUrl = `https://github.com/login/oauth/authorize?${new URLSearchParams(params)}`;
+
+      return {
+        success: true,
+        message: 'Redirecting to GitHub',
+        data: { authUrl, state },
+      };
+    } catch (error) {
+      console.error('GitHub OAuth error:', error);
+      return {
+        success: false,
+        message: 'Failed to initiate GitHub OAuth',
+        data: null,
       };
     }
   }
