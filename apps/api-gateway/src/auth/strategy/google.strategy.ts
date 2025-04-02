@@ -25,26 +25,38 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
     done: VerifyCallback,
   ) {
     try {
-      const { id, displayName, emails, photos } = profile;
-      console.log(profile,'profileprofileprofileprofileprofile')
+      // Добавляем проверку на существование profile
+      if (!profile || !profile.id) {
+        return done(new Error('Invalid Google profile'), false);
+      }
+
+      // Деструктуризация с защитой от undefined
+      const {
+        id,
+        displayName = 'Google User',
+        emails = [],
+        photos = []
+      } = profile;
+
       const user = {
-        googleId: id,
-        username: displayName || this.generateUniqueUsername(displayName), 
-        email: emails[0].value,
-        avatar: photos[0]?.value,
+        googleId: id || '11',
+        username: displayName || this.generateUniqueUsername(),
+        email: emails[0]?.value || `${id}@google.com`,
+        avatar: photos[0]?.value || null,
         accessToken
       };
 
+      console.log('Google profile data:', profile);
+      console.log('Processed user:', user);
 
       done(null, user);
     } catch (error) {
-      console.log(error);
+      console.error('Google auth error:', error);
+      done(error, false);
     }
   }
-  private generateUniqueUsername(displayName: string): string {
-    // Генерация уникального username, например, добавление случайных чисел
-    const cleanName = displayName.replace(/\s+/g, '_').toLowerCase();
-    return `${cleanName}_${Math.floor(Math.random() * 10000)}`;
+  private generateUniqueUsername(): string {
+    return `user_${Math.floor(Math.random() * 100000)}`;
   }
 
 }
