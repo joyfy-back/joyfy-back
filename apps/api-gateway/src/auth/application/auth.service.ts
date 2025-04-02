@@ -16,7 +16,7 @@ export class AuthService {
     protected authRepository: AuthRepository,
     protected jwtService: JwtService,
     protected configService: ConfigService,
-  ) {}
+  ) { }
 
   async checkCredentials(
     email: string,
@@ -156,4 +156,36 @@ export class AuthService {
       };
     }
   }
+  async getOauthGoogle(isLocalHost: boolean) {
+    try {
+      const state = crypto.randomBytes(16).toString('hex');
+      const config = this.configService.get('apiSettings')
+
+      const params = {
+        client_id: config.GOOGLE_CLIENT_ID,
+        redirect_uri: 'https://gateway.joyfy.online/api/v1/auth/google/callback',
+        response_type: 'code',
+        scope: 'openid email profile',
+        state: state, // Для защиты от CSRF
+        prompt: 'consent' // Принудительно запрашивает разрешения
+      };
+
+      // Формируем URL для перенаправления
+      const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?${new URLSearchParams(params)}`;
+
+      return {
+        success: true,
+        message: 'Redirecting to GitHub',
+        data: { authUrl },
+      };
+    } catch (error) {
+      console.error('GitHub OAuth error:', error);
+      return {
+        success: false,
+        message: 'Failed to initiate GitHub OAuth',
+        data: null,
+      };
+    }
+  }
+
 }

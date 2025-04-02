@@ -200,7 +200,7 @@ export class AuthRepository {
             googleId: dto.googleId,
             username: dto.username,
             email: dto.email,
-            avatar: dto.avatar,
+            avatar: dto.avatar || 'opa',
             accountId: account.accountId,
           },
         });
@@ -293,7 +293,6 @@ export class AuthRepository {
       const session = await this.prisma.deviceSessions.findFirst({
         where: {
           deviceId: deviceId,
-          userId: userId,
         },
       });
 
