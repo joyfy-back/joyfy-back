@@ -133,7 +133,7 @@ export class AuthService {
           ? 'Ov23linfRpuNdG9dqBPE'
           : this.configService.get('apiSettings.GITHUB_CLIENT_ID'),
         redirect_uri: isLocalHost
-          ? 'http://localhost:3000/api/v1/auth/github/callback'
+          ? 'https://gateway.joyfy.online/api/v1/auth/github/callback'
           : this.configService.get('apiSettings.GITHUB_CALLBACK_URL'),
         scope: scope,
         state: state,
