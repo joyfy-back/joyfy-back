@@ -489,10 +489,7 @@ export class AuthController {
         ),
       );
       if (!result.success) {
-        throw new HttpException(
-          `${result.message}`,
-          HttpStatus.INTERNAL_SERVER_ERROR,
-        );
+        throw new Error()
       }
 
       const tokens: Result<TokensType> = await this.commandBuse.execute(
