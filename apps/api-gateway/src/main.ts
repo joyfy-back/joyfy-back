@@ -13,7 +13,7 @@ import {
 async function bootstrap() {
   const app = await NestFactory.create(ApiGatewayModule);
   app.enableCors({
-    origin: '*',
+    origin: 'http://localhost:3000, https://joyfy.online',
     methods: 'GET,POST,PUT,DELETE,OPTIONS',
     allowedHeaders: 'Content-Type,Authorization,X-Requested-With',
     credentials: true,
