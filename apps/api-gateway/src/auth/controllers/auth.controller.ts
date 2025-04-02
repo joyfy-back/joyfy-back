@@ -48,6 +48,7 @@ import { CreateAccountUserGithubCommand } from '../application/use-cases/create-
 import { CreateAccountUserGoogleCommand } from '../application/use-cases/create-account.user.google.use-case';
 import { RecaptchaService } from '../application/recaptcha.service';
 import axios from 'axios';
+import { PrismaService } from '../../shared/prisma/prisma.service';
 
 @Controller('auth')
 export class AuthController {
@@ -58,6 +59,7 @@ export class AuthController {
     protected authQueryRepository: AuthQueryRepository,
     protected jwtService: JwtService,
     protected recaptchaService: RecaptchaService,
+    protected prisma: PrismaService
   ) { }
 
   @Post('registration')
@@ -597,4 +599,30 @@ export class AuthController {
       );
     }
   }
+  @Delete('all-data')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({ 
+    summary: 'Полная очистка базы данных',
+    description: 'Удаляет все данные из всех таблиц. Только для разработки!'
+  })
+  @ApiResponse({
+    status: 204,
+    description: 'Все данные успешно удалены'
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'Доступ запрещен в production'
+  })
+  async clearDatabase() {
+    await this.prisma.$transaction([
+      this.prisma.recoveryPassword.deleteMany(),
+      this.prisma.deviceSessions.deleteMany(),
+      this.prisma.githubUser.deleteMany(),
+      this.prisma.googleUser.deleteMany(),
+      this.prisma.emailConfirmation.deleteMany(),
+      this.prisma.account.deleteMany(),
+      this.prisma.user.deleteMany(),
+    ]);
+  }
 }
+
