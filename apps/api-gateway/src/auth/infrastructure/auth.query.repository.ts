@@ -1,11 +1,11 @@
-import { Injectable } from '@nestjs/common';
+import { ConflictException, Injectable } from '@nestjs/common';
 import { PrismaService } from '../../shared/prisma/prisma.service';
 import { Result } from 'libs/shared/types';
 import { formatErrorMessage } from '../../shared/libs/format-error-message';
 
 @Injectable()
 export class AuthQueryRepository {
-  constructor(protected prisma: PrismaService) {}
+  constructor(protected prisma: PrismaService) { }
 
   async getSessions(userId: string): Promise<Result<any>> {
     try {
@@ -112,5 +112,17 @@ export class AuthQueryRepository {
         data: [],
       };
     }
+  }
+
+  async getGitHubAccount(email: string) {
+    const githubUser = await this.prisma.githubUser.findUnique({
+      where: { email }
+    });
+  
+    if (githubUser) {
+      throw new ConflictException('Пользователь с таким email уже зарегистрирован через GitHub');
+    }
+  
+    return githubUser;
   }
 }
