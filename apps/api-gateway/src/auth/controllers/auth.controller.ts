@@ -372,6 +372,9 @@ export class AuthController {
       if (!req.user) {
         throw new UnauthorizedException('GitHub authentication failed');
       }
+      await this.authQueryRepository.getGitHubAccount(req.user.email)
+
+
       const result = await this.commandBuse.execute(
         new CreateAccountUserGithubCommand(
           req.user.email,
@@ -468,6 +471,7 @@ export class AuthController {
   @ApiExcludeEndpoint()
   async googleCallback(@Request() req, @Res() res: Response) {
     const user = req.user;
+
 
     const result = await this.commandBuse.execute(
       new CreateAccountUserGoogleCommand(

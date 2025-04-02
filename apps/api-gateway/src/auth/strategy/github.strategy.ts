@@ -12,7 +12,7 @@ export class GithubStrategy extends PassportStrategy(Strategy, 'github') {
     const settingsGitHub = {
       clientID: 'Ov23linfRpuNdG9dqBPE',
       clientSecret: '474e1146c2fb9fc73cde3686969c43ec38cb0a7e',
-      callbackURL: 'http://localhost:3000/api/v1/auth/github/callback',
+      callbackURL: 'https://gateway.joyfy.online/api/v1/auth/github/callback',
       scope: ['user:email', 'read:user'],
       passReqToCallback: true,
     } as unknown as StrategyOptions;

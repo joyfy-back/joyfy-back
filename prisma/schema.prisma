@@ -36,7 +36,7 @@ model Account {
 model GithubUser {
   githubId  String  @unique
   username  String
-  email     String
+  email     String  @unique
   accountId String  @unique
   account   Account @relation(fields: [accountId], references: [accountId], onDelete: Cascade)
 
@@ -46,7 +46,7 @@ model GithubUser {
 model GoogleUser {
   googleId  String  @unique
   username  String
-  email     String
+  email     String  @unique
   avatar    String
   accountId String  @unique
   account   Account @relation(fields: [accountId], references: [accountId], onDelete: Cascade)
