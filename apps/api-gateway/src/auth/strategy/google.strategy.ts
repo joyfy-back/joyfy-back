@@ -19,41 +19,24 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
   }
 
   async validate(
+    request: any, // <-- Не забудь указать request
     accessToken: string,
     refreshToken: string,
-    profile: any,
-    done: VerifyCallback,
+    profile: any
   ) {
-    try {
-      // Добавляем проверку на существование profile
-      if (!profile || !profile.id) {
-        return done(new Error('Invalid Google profile'), false);
-      }
-
-      // Деструктуризация с защитой от undefined
-      const {
-        id,
-        displayName = 'Google User',
-        emails = [],
-        photos = []
-      } = profile;
-
-      const user = {
-        googleId: id || '11',
-        username: displayName || this.generateUniqueUsername(),
-        email: emails[0]?.value || `${id}@google.com`,
-        avatar: photos[0]?.value || null,
-        accessToken
-      };
-
-      console.log('Google profile data:', profile);
-      console.log('Processed user:', user);
-
-      done(null, user);
-    } catch (error) {
-      console.error('Google auth error:', error);
-      done(error, false);
+    if (!profile || !profile.id) {
+      throw new Error('Invalid Google profile');
     }
+
+    const { id, displayName = 'Google User', emails = [], photos = [] } = profile;
+
+    return {
+      googleId: id || '11',
+      username: displayName || this.generateUniqueUsername(),
+      email: emails[0]?.value || `${id}@google.com`,
+      avatar: photos[0]?.value || null,
+      accessToken,
+    };
   }
   private generateUniqueUsername(): string {
     return `user_${Math.floor(Math.random() * 100000)}`;

@@ -143,8 +143,8 @@ export class AuthController {
     @Request() req,
   ) {
     const checkCredentials = await this.authService.checkCredentials(
-      dto.Email,
-      dto.Password,
+      dto.email,
+      dto.password,
     );
 
     if (!checkCredentials.success) {
@@ -159,7 +159,7 @@ export class AuthController {
         checkCredentials.data[0].username,
         userAgent,
         req.ip,
-        dto.Email,
+        dto.email,
       ),
     );
 
@@ -477,7 +477,11 @@ export class AuthController {
         throw new UnauthorizedException('Google authentication failed');
       }
 
-      await this.authQueryRepository.getGoogleAccount(req.user.email)
+      const googleEmail = await this.authQueryRepository.getGoogleAccount(req.user.email)
+
+      if (!googleEmail.success) {
+        throw new Error('Пользователь с таким email уже зарегистрирован через GitHub')
+      }
 
 
       const result = await this.commandBuse.execute(
