@@ -146,7 +146,7 @@ export class AuthQueryRepository {
       return {
         success: false,
         message:
-          'Пользователь с таким email уже зарегистрирован через GitHub',
+          'Пользователь с таким email уже через GitHub',
         data: [],
       };
     }
@@ -155,4 +155,3 @@ export class AuthQueryRepository {
 }
 
 
-throw new ConflictException('Пользователь с таким email уже зарегистрирован через GitHub');
