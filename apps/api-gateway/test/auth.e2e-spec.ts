@@ -97,8 +97,8 @@ describe('ApiGatewayController (e2e)', () => {
       const response = await request(app.getHttpServer())
         .post('/auth/login')
         .send({
-          Email: userData.email,
-          Password: userData.password,
+          email: userData.email,
+          password: userData.password,
         })
         .expect(200);
 

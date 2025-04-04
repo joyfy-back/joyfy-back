@@ -10,7 +10,7 @@ import {
 export class UserLoginInputDto {
   @ApiProperty({ example: 'john@example.com', description: 'User email' })
   @IsEmail({}, { message: 'Invalid email format' })
-  Email: string;
+  email: string;
 
   @ApiProperty({ example: 'Password123!', description: 'User password' })
   @IsString()
@@ -20,5 +20,5 @@ export class UserLoginInputDto {
     message:
       'Password can only contain letters, numbers, and special characters: !@#$%^&*()_+-=[]{};\':"\\|,.<>/?~`',
   })
-  Password: string;
+  password: string;
 }

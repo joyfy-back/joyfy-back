@@ -143,8 +143,8 @@ export class AuthController {
     @Request() req,
   ) {
     const checkCredentials = await this.authService.checkCredentials(
-      dto.Email,
-      dto.Password,
+      dto.email,
+      dto.password,
     );
 
     if (!checkCredentials.success) {
@@ -159,7 +159,7 @@ export class AuthController {
         checkCredentials.data[0].username,
         userAgent,
         req.ip,
-        dto.Email,
+        dto.email,
       ),
     );
 
@@ -470,17 +470,95 @@ export class AuthController {
   @UseGuards(AuthGuard('google'))
   @ApiExcludeEndpoint()
   async googleCallback(@Request() req, @Res() res: Response) {
-    const user = req.user;
+    try {
+      const userAgent = req.headers['user-agent'] || 'unknown device';
+
+      if (!req.user) {
+        throw new UnauthorizedException('Google authentication failed');
+      }
+
+      const googleEmail = await this.authQueryRepository.getGoogleAccount(req.user.email)
+
+      if (!googleEmail.success) {
+        throw new Error('Пользователь с таким email уже зарегистрирован через GitHub')
+      }
 
 
-    const result = await this.commandBuse.execute(
-      new CreateAccountUserGoogleCommand(
-        req.user.email,
-        req.user.username,
-        req.user.googleId,
-        req.user.avatar,
-      ),
-    );
+      const result = await this.commandBuse.execute(
+        new CreateAccountUserGoogleCommand(
+          req.user.email,
+          req.user.username,
+          req.user.googleId,
+          'fdfsdfsdf'
+        ),
+      );
+      if (!result.success) {
+        throw new Error()
+      }
+
+      const tokens: Result<TokensType> = await this.commandBuse.execute(
+        new LoginUserCommand(
+          req.user.googleId,
+          req.user.username,
+          userAgent,
+          req.ip,
+          req.user.email,
+        ),
+      );
+
+      const accessToken = tokens.data[0].accessToken;
+
+      res.cookie('refreshToken', tokens.data[0].refreshToken, {
+        httpOnly: true,
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+        sameSite: 'strict',
+      });
+
+      res.redirect(307, 'http://localhost:3000/auth/google/login-success');
+      return res.json({ accessToken });
+
+    } catch (error) {
+
+      console.error('GitHub auth error:', error);
+      return res.redirect(
+        'http://localhost:3000/auth/login?error=google_failed',
+      );
+    }
+  }
+
+  @Get('google')
+  @HttpCode(302)
+  @ApiOperation({
+    summary: 'Initiate GitHub OAuth flow',
+    description:
+      'Redirects user to GitHub for authentication. After successful login, GitHub will redirect back to the callback URL.',
+  })
+  @ApiResponse({
+    status: 302,
+    description:
+      'Redirects user to GitHub OAuth page for authentication. After successful login on GitHub, user will be redirected to `${base_url}auth/github/login-success` with access token in response and refresh token set in HttpOnly cookie. If authentication fails, user will be redirected to `${base_url}auth/login.',
+    headers: {
+      Location: {
+        description: 'GitHub OAuth URL',
+        schema: {
+          type: 'string',
+          example: 'https://github.com/login/oauth/authorize?client_id=...',
+        },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 500,
+    description: 'Internal server error',
+    schema: {
+      example: {
+        statusCode: 500,
+        message: 'Authorization URL not found',
+      },
+    },
+  })
+  async gitOauthGoogle(@Request() req, @Res() res: Response) {
+    const result = await this.authService.getOauthGoogle(true);
 
     if (!result.success) {
       throw new HttpException(
@@ -488,16 +566,15 @@ export class AuthController {
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
-
-    const token = this.jwtService.sign({
-      id: user.googleId,
-      username: user.username,
-    });
-
-    return res.redirect(
-      `https://joyfy.online/auth/google/login-success?token=${token}`,
-    );
+    if (!result.data) {
+      throw new HttpException(
+        'Authorization URL not found',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+    return res.redirect(result.data.authUrl);
   }
+
 
   @Get('devices')
   @HttpCode(200)
@@ -601,7 +678,7 @@ export class AuthController {
   }
   @Delete('all-data')
   @HttpCode(HttpStatus.NO_CONTENT)
-  @ApiOperation({ 
+  @ApiOperation({
     summary: 'Полная очистка базы данных',
     description: 'Удаляет все данные из всех таблиц. Только для разработки!'
   })
