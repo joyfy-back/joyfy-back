@@ -409,6 +409,7 @@ export class AuthController {
       });
 
       res.redirect(307, 'http://localhost:3000/auth/github/login-success');
+      this.emailService.sendWelcomeEmail(req.user.email)
       return res.json({ accessToken });
     } catch (error) {
       console.error('GitHub auth error:', error);
@@ -515,6 +516,9 @@ export class AuthController {
       });
 
       res.redirect(307, 'http://localhost:3000/auth/google/login-success');
+      console.log(req.user.email,"req.user.emailreq.user.emailreq.user.email")
+      this.emailService.sendWelcomeEmail(req.user.email)
+
       return res.json({ accessToken });
 
     } catch (error) {

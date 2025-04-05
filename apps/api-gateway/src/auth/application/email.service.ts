@@ -231,4 +231,124 @@ export class EmailService {
       };
     }
   }
+  async sendWelcomeEmail(email: string) {
+    console.log(email, 'emailemail')
+    const transporter = createTransport({
+      service: 'gmail',
+      auth: {
+        user: 'testestuser22@gmail.com',
+        pass: 'hmoi odon lzcv rbgc',
+      },
+    });
+    console.log('fsdfsdfsd')
+  
+    const welcomeEmailTemplate = `
+      <!DOCTYPE html>
+      <html lang="en">
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Welcome to Joyfy</title>
+        <style>
+          body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+          }
+          .container {
+            max-width: 600px;
+            margin: 20px auto;
+            background-color: #ffffff;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+          }
+          .header {
+            background: linear-gradient(135deg, #405DE6, #833AB4);
+            color: #ffffff;
+            text-align: center;
+            padding: 20px;
+          }
+          .header h1 {
+            margin: 0;
+            font-size: 24px;
+          }
+          .content {
+            padding: 20px;
+            text-align: center;
+          }
+          .content p {
+            font-size: 16px;
+            color: #333333;
+            line-height: 1.6;
+          }
+          .highlight {
+            font-weight: bold;
+            color: #405DE6;
+          }
+          .footer {
+            text-align: center;
+            padding: 10px;
+            font-size: 12px;
+            color: #777777;
+          }
+          .features {
+            text-align: left;
+            margin: 20px 0;
+          }
+          .feature-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+          }
+          .feature-icon {
+            margin-right: 10px;
+            color: #833AB4;
+          }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <h1>Welcome to Joyfy!</h1>
+          </div>
+          <div class="content">
+            <p>Congratulations and welcome to Joyfy! Your registration is now complete.</p>
+            
+            <div class="features">
+              <div class="feature-item">
+                <span class="feature-icon">✓</span>
+                <span>Explore all our features</span>
+              </div>
+              <div class="feature-item">
+                <span class="feature-icon">✓</span>
+                <span>Connect with other users</span>
+              </div>
+              <div class="feature-item">
+                <span class="feature-icon">✓</span>
+                <span>Enjoy personalized content</span>
+              </div>
+            </div>
+  
+            <p>We're excited to have you on board. If you have any questions, feel free to contact our support team.</p>
+            <p>Happy exploring!</p>
+          </div>
+          <div class="footer">
+            <p>The Joyfy Team</p>
+            <p>If you didn't create an account, please contact us immediately.</p>
+          </div>
+        </div>
+      </body>
+      </html>
+    `;
+  
+    return transporter.sendMail({
+      from: 'Joyfy <welcome@joyfy.online>',
+      to: email,
+      subject: 'Welcome to Joyfy! Registration Successful',
+      html: welcomeEmailTemplate,
+    });
+  }
+  
 }
