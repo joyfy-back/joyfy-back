@@ -437,7 +437,6 @@ export class AuthController {
 
       res.redirect(307, 'http://localhost:3000/auth/github/login-success');
       this.emailService.sendWelcomeEmail(req.user.email)
-      return res.json({ accessToken });
     } catch (error) {
       console.error('GitHub auth error:', error);
       return res.redirect(
@@ -534,8 +533,6 @@ export class AuthController {
         ),
       );
 
-      const accessToken = tokens.data[0].accessToken;
-
       res.cookie('refreshToken', tokens.data[0].refreshToken, {
         httpOnly: true,
         maxAge: 7 * 24 * 60 * 60 * 1000,
@@ -549,8 +546,6 @@ export class AuthController {
 
       res.redirect(307, 'http://localhost:3000/auth/google/login-success');
       this.emailService.sendWelcomeEmail(req.user.email)
-
-      return res.json({ accessToken });
 
     } catch (error) {
 
