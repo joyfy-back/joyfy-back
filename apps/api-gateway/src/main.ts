@@ -14,27 +14,22 @@ async function bootstrap() {
   const app = await NestFactory.create(ApiGatewayModule);
 
   const allowedOrigins = ['http://localhost:3000', 'https://joyfy.online'];
+
   app.enableCors({
-    origin: '*',
-    methods: 'GET,POST,PUT,DELETE,OPTIONS',
-    allowedHeaders: 'Content-Type,Authorization,X-Requested-With',  });
-
-
-  // app.enableCors({
-  //   origin: (
-  //     origin: string | undefined,
-  //     callback: (error: Error | null, origin?: string | boolean) => void,
-  //   ) => {
-  //     if (!origin || allowedOrigins.includes(origin)) {
-  //       callback(null, origin);
-  //     } else {
-  //       callback(new Error('Not allowed by CORS'));
-  //     }
-  //   },
-  //   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  //   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
-  //   credentials: true,
-  // });
+    origin: (
+      origin: string | undefined,
+      callback: (error: Error | null, origin?: string | boolean) => void,
+    ) => {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, origin);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+    credentials: true,
+  });
 
   const config = new DocumentBuilder()
     .setTitle(SWAGGER_TITLE)
