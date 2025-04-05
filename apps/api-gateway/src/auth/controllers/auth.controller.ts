@@ -173,7 +173,18 @@ export class AuthController {
       maxAge: 30 * 24 * 60 * 60 * 1000, //30 day
     });
 
-    return res.json({ accessToken: tokens.data[0].accessToken });
+    res.cookie('accessToken', tokens.data[0].accessToken, {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'strict',
+      maxAge: 15 * 60 * 1000,
+      path: '/',
+    });
+
+    return res.json({
+      success: true,
+      message: 'Authentication successful. Tokens are set in HTTP-only cookies.'
+    });
   }
 
   @Post('logout')
@@ -407,6 +418,14 @@ export class AuthController {
         maxAge: 7 * 24 * 60 * 60 * 1000,
         sameSite: 'strict',
       });
+      res.cookie('accessToken', tokens.data[0].accessToken, {
+        httpOnly: true,
+        secure: true,
+        sameSite: 'strict',
+        maxAge: 15 * 60 * 1000,
+        path: '/',
+      });
+
 
       res.redirect(307, 'http://localhost:3000/auth/github/login-success');
       this.emailService.sendWelcomeEmail(req.user.email)
@@ -514,9 +533,14 @@ export class AuthController {
         maxAge: 7 * 24 * 60 * 60 * 1000,
         sameSite: 'strict',
       });
+      res.cookie('accessToken', tokens.data[0].accessToken, {
+        httpOnly: true,
+        secure: true,
+        sameSite: 'strict',
+        maxAge: 15 * 60 * 1000,
+      });
 
       res.redirect(307, 'http://localhost:3000/auth/google/login-success');
-      console.log(req.user.email,"req.user.emailreq.user.emailreq.user.email")
       this.emailService.sendWelcomeEmail(req.user.email)
 
       return res.json({ accessToken });
