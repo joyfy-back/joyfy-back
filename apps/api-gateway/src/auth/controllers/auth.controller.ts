@@ -266,7 +266,17 @@ export class AuthController {
       maxAge: 30 * 24 * 60 * 60 * 1000,
     });
 
-    return res.json({ accessToken: tokens.accessToken });
+    
+    res.cookie('accessToken', tokens.accessToken, {
+      httpOnly: true,
+      sameSite: 'strict',
+      maxAge: 15 * 60 * 1000,
+    });
+
+    return res.json({
+      success: true,
+      message: 'successful.'
+    });
   }
 
   @Post('registration-email-resending')
@@ -422,7 +432,6 @@ export class AuthController {
         httpOnly: true,
         sameSite: 'strict',
         maxAge: 15 * 60 * 1000,
-        path: '/',
       });
 
 
