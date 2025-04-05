@@ -80,22 +80,24 @@ export class AuthService {
     }
   }
 
-  async updateToken(payload: any) {
-    const body = {
-      userLogin: payload.userLogin,
-      userId: payload.userId,
-      deviceId: payload.deviceId,
+  async updateToken(accessToken: any) {
+    const data = this.jwtService.decode(accessToken)
+    console.log(data,'datadatadata')
+    const payloads = {
+      userName: data.userName || 'null',
+      userId: data.userId || 'null',
+      deviceId: data.deviceId|| 'null',
+      email: data.email || 'null',
     };
-
     const tokens = {
-      accessToken: this.jwtService.sign(body),
-      refreshToken: this.jwtService.sign(body, { expiresIn: '1h' }),
+      accessToken: this.jwtService.sign(payloads),
+      refreshToken: this.jwtService.sign(payloads, { expiresIn: '1d' }),
     };
 
     await this.authRepository.updateSession(
       this.jwtService.decode(tokens.refreshToken).iat,
-      payload.userId,
-      payload.deviceId,
+      data.userId,
+      data.deviceId,
     );
 
     return tokens;

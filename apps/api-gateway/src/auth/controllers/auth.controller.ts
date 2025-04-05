@@ -257,7 +257,7 @@ export class AuthController {
       throw new HttpException('UNAUTHORIZED', HttpStatus.UNAUTHORIZED);
     }
 
-    const tokens = await this.authService.updateToken(result.data);
+    const tokens = await this.authService.updateToken(req.cookies.accessToken);
 
     res.cookie('refreshToken', tokens.refreshToken, {
       httpOnly: true,
@@ -537,10 +537,13 @@ export class AuthController {
       );
       res.cookie('refreshToken', tokens.data[0].refreshToken, {
         httpOnly: true,
+        secure: false, // Отключаем для localhost
+        sameSite: 'lax', // Или 'strict'
+        domain: 'localhost',
         maxAge: 7 * 24 * 60 * 60 * 1000,
-        sameSite: 'none',
-        secure: true,     
-      });
+        path: '/',
+      });      
+    
       
       res.cookie('accessToken', tokens.data[0].accessToken, {
         httpOnly: true,
@@ -549,8 +552,8 @@ export class AuthController {
         secure: true, 
       });
       this.emailService.sendWelcomeEmail(req.user.email)
-      res.redirect(307, 'https://joyfy.online/auth/google/login-success')
-      // res.redirect(307, 'http://localhost:3000/auth/google/login-success');
+      // res.redirect(307, 'https://joyfy.online/auth/google/login-success')
+      res.redirect(307, 'http://localhost:3000/auth/google/login-success');
 
     } catch (error) {
 
