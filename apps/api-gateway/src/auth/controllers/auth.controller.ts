@@ -426,14 +426,17 @@ export class AuthController {
       res.cookie('refreshToken', tokens.data[0].refreshToken, {
         httpOnly: true,
         maxAge: 7 * 24 * 60 * 60 * 1000,
-        sameSite: 'strict',
+        sameSite: 'none', // обязательно
+        secure: true,     // обязательно, даже на localhost в Chrome (или будет проигнорировано)
       });
+      
       res.cookie('accessToken', tokens.data[0].accessToken, {
         httpOnly: true,
-        sameSite: 'strict',
         maxAge: 15 * 60 * 1000,
+        sameSite: 'none', // обязательно
+        secure: true,     // обязательно
       });
-
+      
 
       res.redirect(307, 'http://localhost:3000/auth/github/login-success');
       this.emailService.sendWelcomeEmail(req.user.email)
@@ -532,20 +535,22 @@ export class AuthController {
           req.user.email,
         ),
       );
-
       res.cookie('refreshToken', tokens.data[0].refreshToken, {
         httpOnly: true,
         maxAge: 7 * 24 * 60 * 60 * 1000,
-        sameSite: 'strict',
+        sameSite: 'none',
+        secure: true,     
       });
+      
       res.cookie('accessToken', tokens.data[0].accessToken, {
         httpOnly: true,
-        sameSite: 'strict',
         maxAge: 15 * 60 * 1000,
+        sameSite: 'none',
+        secure: true, 
       });
-
-      res.redirect(307, 'http://localhost:3000/auth/google/login-success');
       this.emailService.sendWelcomeEmail(req.user.email)
+      res.redirect(307, 'https://joyfy.online/auth/google/login-success')
+      // res.redirect(307, 'http://localhost:3000/auth/google/login-success');
 
     } catch (error) {
 
