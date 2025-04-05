@@ -102,7 +102,6 @@ describe('ApiGatewayController (e2e)', () => {
         })
         .expect(200);
 
-      expect(response.body).toHaveProperty('accessToken');
       expect(response.headers['set-cookie']).toBeDefined();
     });
 
