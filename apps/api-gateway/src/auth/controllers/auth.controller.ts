@@ -266,7 +266,7 @@ export class AuthController {
       maxAge: 30 * 24 * 60 * 60 * 1000,
     });
 
-    
+
     res.cookie('accessToken', tokens.accessToken, {
       httpOnly: true,
       sameSite: 'strict',
@@ -429,14 +429,14 @@ export class AuthController {
         sameSite: 'none', // обязательно
         secure: true,     // обязательно, даже на localhost в Chrome (или будет проигнорировано)
       });
-      
+
       res.cookie('accessToken', tokens.data[0].accessToken, {
         httpOnly: true,
         maxAge: 15 * 60 * 1000,
         sameSite: 'none', // обязательно
         secure: true,     // обязательно
       });
-      
+
 
       res.redirect(307, 'http://localhost:3000/auth/github/login-success');
       this.emailService.sendWelcomeEmail(req.user.email)
@@ -541,14 +541,14 @@ export class AuthController {
         sameSite: 'lax', // Попробуйте 'lax' вместо 'none' для localhost
         secure: false,   // Отключите secure для localhost
       });
-  
+
       res.cookie('accessToken', tokens.data[0].accessToken, {
         httpOnly: true,
         maxAge: 15 * 60 * 1000,
         sameSite: 'lax', // Попробуйте 'lax' вместо 'none' для localhost
         secure: false,   // Отключите secure для localhost
       });
-      
+
       this.emailService.sendWelcomeEmail(req.user.email)
       // res.redirect(307, 'https://joyfy.online/auth/google/login-success')
       res.redirect(307, 'http://localhost:3000/auth/google/login-success');
@@ -736,6 +736,15 @@ export class AuthController {
       this.prisma.account.deleteMany(),
       this.prisma.user.deleteMany(),
     ]);
+  }
+  @Get('check-auth')
+  async checkAuth(@Request() req, @Res() res: Response) {
+    const refreshToken = req.cookies.refreshToken;
+    const accessToken = req.cookies.accessToken;
+    if (!refreshToken || !accessToken) {
+      return res.status(401).json({ message: 'Not authenticated' });
+    }
+    return res.json({ message: 'Authenticated'});
   }
 }
 
