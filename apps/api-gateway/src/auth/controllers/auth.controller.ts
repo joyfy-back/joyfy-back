@@ -538,15 +538,17 @@ export class AuthController {
       res.cookie('refreshToken', tokens.data[0].refreshToken, {
         httpOnly: true,
         maxAge: 7 * 24 * 60 * 60 * 1000,
-        sameSite: 'lax', // Попробуйте 'lax' вместо 'none' для localhost
-        secure: false,   // Отключите secure для localhost
+        sameSite: 'lax',
+        secure: true, // Используем secure, так как joyfy.online на HTTPS
+        domain: '.joyfy.online', // Общий домен для всех поддоменов joyfy.online
       });
-
+  
       res.cookie('accessToken', tokens.data[0].accessToken, {
         httpOnly: true,
         maxAge: 15 * 60 * 1000,
-        sameSite: 'lax', // Попробуйте 'lax' вместо 'none' для localhost
-        secure: false,   // Отключите secure для localhost
+        sameSite: 'lax',
+        secure: true, // Используем secure, так как joyfy.online на HTTPS
+        domain: '.joyfy.online', // Общий домен для всех поддоменов joyfy.online
       });
 
       this.emailService.sendWelcomeEmail(req.user.email)
