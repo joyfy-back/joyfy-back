@@ -420,7 +420,6 @@ export class AuthController {
       });
       res.cookie('accessToken', tokens.data[0].accessToken, {
         httpOnly: true,
-        secure: true,
         sameSite: 'strict',
         maxAge: 15 * 60 * 1000,
         path: '/',
@@ -535,7 +534,6 @@ export class AuthController {
       });
       res.cookie('accessToken', tokens.data[0].accessToken, {
         httpOnly: true,
-        secure: true,
         sameSite: 'strict',
         maxAge: 15 * 60 * 1000,
       });
