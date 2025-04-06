@@ -94,7 +94,7 @@ describe('ApiGatewayController (e2e)', () => {
 
       await authTestManager.registrationUser(userData);
 
-      const response = await request(app.getHttpServer())
+     const response = await request(app.getHttpServer())
         .post('/auth/login')
         .send({
           email: userData.email,
@@ -102,6 +102,7 @@ describe('ApiGatewayController (e2e)', () => {
         })
         .expect(200);
 
+      
       expect(response.headers['set-cookie']).toBeDefined();
     });
 

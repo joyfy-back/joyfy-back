@@ -166,7 +166,7 @@ export class AuthController {
     if (!tokens.success) {
       throw new HttpException('UNAUTHORIZED', HttpStatus.UNAUTHORIZED);
     }
-    res.cookie('refreshToken', tokens[0].refreshToken, {
+    res.cookie('refreshToken', tokens.data[0].refreshToken, {
       httpOnly: true,
       maxAge: 7 * 24 * 60 * 60 * 1000,
       sameSite: 'lax', // Или 'strict' для localhost
@@ -174,7 +174,7 @@ export class AuthController {
       domain: '.joyfy.online', // Явно указываем домен
     });
 
-    res.cookie('accessToken', tokens[0].accessToken, {
+    res.cookie('accessToken', tokens.data[0].accessToken, {
       httpOnly: true,
       maxAge: 15 * 60 * 1000,
       sameSite: 'lax',
