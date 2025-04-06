@@ -538,18 +538,19 @@ export class AuthController {
       res.cookie('refreshToken', tokens.data[0].refreshToken, {
         httpOnly: true,
         maxAge: 7 * 24 * 60 * 60 * 1000,
-        sameSite: 'lax',
-        secure: true,
-        domain: 'localhost', // Общий домен для всех поддоменов joyfy.online
+        sameSite: 'lax', // Или 'strict' для localhost
+        secure: false, // Отключаем для HTTP на localhost
+        domain: 'localhost', // Явно указываем домен
       });
-  
+      
       res.cookie('accessToken', tokens.data[0].accessToken, {
         httpOnly: true,
         maxAge: 15 * 60 * 1000,
         sameSite: 'lax',
-        secure: true,
-        domain: 'localhost', // Общий домен для всех поддоменов joyfy.online
+        secure: false, // Отключаем Secure для HTTP
+        domain: 'localhost',
       });
+      
 
       this.emailService.sendWelcomeEmail(req.user.email)
       // res.redirect(307, 'https://joyfy.online/auth/google/login-success')
