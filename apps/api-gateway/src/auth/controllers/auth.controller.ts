@@ -542,7 +542,7 @@ export class AuthController {
         secure: false, // Отключаем для HTTP на localhost
         domain: '.joyfy.online', // Явно указываем домен
       });
-      
+
       res.cookie('accessToken', tokens.data[0].accessToken, {
         httpOnly: true,
         maxAge: 15 * 60 * 1000,
@@ -550,11 +550,13 @@ export class AuthController {
         secure: false, // Отключаем Secure для HTTP
         domain: '.joyfy.online',
       });
-      
+
 
       this.emailService.sendWelcomeEmail(req.user.email)
       // res.redirect(307, 'https://joyfy.online/auth/google/login-success')
-      res.redirect(307, 'http://localhost:3000/auth/google/login-success');
+      // res.redirect(307, 'http://localhost:3000/auth/google/login-success');
+      res.redirect(307, 'http://dev.joyfy.online/auth/google/login-success')
+
 
     } catch (error) {
 
@@ -747,7 +749,7 @@ export class AuthController {
     if (!refreshToken || !accessToken) {
       return res.status(401).json({ message: 'Not authenticated' });
     }
-    return res.json({ message: 'Authenticated'});
+    return res.json({ message: 'Authenticated' });
   }
 }
 
