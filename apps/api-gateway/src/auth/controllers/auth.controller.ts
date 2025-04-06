@@ -540,7 +540,7 @@ export class AuthController {
         maxAge: 7 * 24 * 60 * 60 * 1000,
         sameSite: 'lax', // Или 'strict' для localhost
         secure: false, // Отключаем для HTTP на localhost
-        domain: '.joyfy.online', // Явно указываем домен
+        domain: 'localhost', // Явно указываем домен
       });
 
       res.cookie('accessToken', tokens.data[0].accessToken, {
@@ -548,7 +548,8 @@ export class AuthController {
         maxAge: 15 * 60 * 1000,
         sameSite: 'lax',
         secure: false, // Отключаем Secure для HTTP
-        domain: '.joyfy.online',
+        domain: 'localhost',
+
       });
 
 
