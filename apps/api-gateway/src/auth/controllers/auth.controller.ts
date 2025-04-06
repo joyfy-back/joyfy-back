@@ -539,24 +539,24 @@ export class AuthController {
         httpOnly: true,
         maxAge: 7 * 24 * 60 * 60 * 1000,
         sameSite: 'lax', // Или 'strict' для localhost
-        secure: false, // Отключаем для HTTP на localhost
-        domain: 'localhost', // Явно указываем домен
+        secure: true, // Отключаем для HTTP на localhost
+        domain: '.joyfy.online', // Явно указываем домен
       });
 
       res.cookie('accessToken', tokens.data[0].accessToken, {
         httpOnly: true,
         maxAge: 15 * 60 * 1000,
         sameSite: 'lax',
-        secure: false, // Отключаем Secure для HTTP
-        domain: 'localhost',
+        secure: true, // Отключаем Secure для HTTP
+        domain: '.joyfy.online',
 
       });
 
 
       this.emailService.sendWelcomeEmail(req.user.email)
       // res.redirect(307, 'https://joyfy.online/auth/google/login-success')
-      res.redirect(307, 'http://localhost:3000/auth/google/login-success');
-      // res.redirect(307, 'http://dev.joyfy.online/auth/google/login-success')
+      // res.redirect(307, 'http://localhost:3000/auth/google/login-success');
+      res.redirect(307, 'https://dev.joyfy.online/auth/google/login-success')
 
 
     } catch (error) {
