@@ -13,7 +13,7 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
       clientSecret: apiSettings.GOOGLE_CLIENT_SECRET || 'null',
       callbackURL: 'https://gateway.joyfy.online/api/v1/auth/google/callback',
       scope: ['email', 'profile'],
-      passReqToCallback: true // Если нужно передавать request
+      passReqToCallback: true
     } as unknown as StrategyOptions;
     super(settingsGitHub);
   }

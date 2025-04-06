@@ -265,16 +265,16 @@ export class AuthController {
     res.cookie('refreshToken', tokens.refreshToken, {
       httpOnly: true,
       maxAge: 7 * 24 * 60 * 60 * 1000,
-      sameSite: 'lax', // Или 'strict' для localhost
-      secure: true, // Отключаем для HTTP на localhost
-      domain: '.joyfy.online', // Явно указываем домен
+      sameSite: 'lax',
+      secure: true, 
+      domain: '.joyfy.online',
     });
 
     res.cookie('accessToken', tokens.accessToken, {
       httpOnly: true,
       maxAge: 15 * 60 * 1000,
       sameSite: 'lax',
-      secure: true, // Отключаем Secure для HTTP
+      secure: true,
       domain: '.joyfy.online',
 
     });
@@ -427,32 +427,29 @@ export class AuthController {
         ),
       );
 
-      const accessToken = tokens.data[0].accessToken;
-
       res.cookie('refreshToken', tokens.data[0].refreshToken, {
         httpOnly: true,
         maxAge: 7 * 24 * 60 * 60 * 1000,
-        sameSite: 'lax', // Или 'strict' для localhost
-        secure: true, // Отключаем для HTTP на localhost
-        domain: '.joyfy.online', // Явно указываем домен
+        sameSite: 'lax', 
+        secure: true, 
+        domain: '.joyfy.online', 
       });
 
       res.cookie('accessToken', tokens.data[0].accessToken, {
         httpOnly: true,
         maxAge: 15 * 60 * 1000,
         sameSite: 'lax',
-        secure: true, // Отключаем Secure для HTTP
+        secure: true, 
         domain: '.joyfy.online',
 
       });
 
-
-      res.redirect(307, 'http://localhost:3000/auth/github/login-success');
       this.emailService.sendWelcomeEmail(req.user.email)
+      res.redirect(307, 'https://dev.joyfy.online/auth/github/login-success');
     } catch (error) {
       console.error('GitHub auth error:', error);
       return res.redirect(
-        'http://localhost:3000/auth/login?error=github_failed',
+        'https://dev.joyfy.online/auth/login?error=github_failed',
       );
     }
   }
@@ -563,8 +560,6 @@ export class AuthController {
 
 
       this.emailService.sendWelcomeEmail(req.user.email)
-      // res.redirect(307, 'https://joyfy.online/auth/google/login-success')
-      // res.redirect(307, 'http://localhost:3000/auth/google/login-success');
       res.redirect(307, 'https://dev.joyfy.online/auth/google/login-success')
 
 
@@ -572,7 +567,7 @@ export class AuthController {
 
       console.error('GitHub auth error:', error);
       return res.redirect(
-        'http://localhost:3000/auth/login?error=google_failed',
+        'https://dev.joyfy.online/auth/login?error=google_failed',
       );
     }
   }
