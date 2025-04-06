@@ -327,7 +327,6 @@ export class AuthRepository {
       await this.prisma.deviceSessions.delete({
         where: {
           deviceId: deviceId,
-          userId: userId,
         },
       });
 
