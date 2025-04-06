@@ -166,20 +166,23 @@ export class AuthController {
     if (!tokens.success) {
       throw new HttpException('UNAUTHORIZED', HttpStatus.UNAUTHORIZED);
     }
-
     res.cookie('refreshToken', tokens.data[0].refreshToken, {
       httpOnly: true,
-      secure: true,
-      maxAge: 30 * 24 * 60 * 60 * 1000, //30 day
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+      sameSite: 'lax', // Или 'strict' для localhost
+      secure: true, // Отключаем для HTTP на localhost
+      domain: '.joyfy.online', // Явно указываем домен
     });
 
     res.cookie('accessToken', tokens.data[0].accessToken, {
       httpOnly: true,
-      secure: true,
-      sameSite: 'strict',
       maxAge: 15 * 60 * 1000,
-      path: '/',
+      sameSite: 'lax',
+      secure: true, // Отключаем Secure для HTTP
+      domain: '.joyfy.online',
+
     });
+
 
     return res.json({
       success: true,
@@ -257,20 +260,23 @@ export class AuthController {
       throw new HttpException('UNAUTHORIZED', HttpStatus.UNAUTHORIZED);
     }
 
-    const tokens = await this.authService.updateToken(result.data);
+    const tokens = await this.authService.updateToken(req.cookies.accessToken);
 
     res.cookie('refreshToken', tokens.refreshToken, {
       httpOnly: true,
-      secure: true,
-      sameSite: 'strict',
-      maxAge: 30 * 24 * 60 * 60 * 1000,
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+      sameSite: 'lax', // Или 'strict' для localhost
+      secure: true, // Отключаем для HTTP на localhost
+      domain: '.joyfy.online', // Явно указываем домен
     });
 
-    
     res.cookie('accessToken', tokens.accessToken, {
       httpOnly: true,
-      sameSite: 'strict',
       maxAge: 15 * 60 * 1000,
+      sameSite: 'lax',
+      secure: true, // Отключаем Secure для HTTP
+      domain: '.joyfy.online',
+
     });
 
     return res.json({
@@ -426,12 +432,18 @@ export class AuthController {
       res.cookie('refreshToken', tokens.data[0].refreshToken, {
         httpOnly: true,
         maxAge: 7 * 24 * 60 * 60 * 1000,
-        sameSite: 'strict',
+        sameSite: 'lax', // Или 'strict' для localhost
+        secure: true, // Отключаем для HTTP на localhost
+        domain: '.joyfy.online', // Явно указываем домен
       });
+
       res.cookie('accessToken', tokens.data[0].accessToken, {
         httpOnly: true,
-        sameSite: 'strict',
         maxAge: 15 * 60 * 1000,
+        sameSite: 'lax',
+        secure: true, // Отключаем Secure для HTTP
+        domain: '.joyfy.online',
+
       });
 
 
@@ -532,20 +544,29 @@ export class AuthController {
           req.user.email,
         ),
       );
-
       res.cookie('refreshToken', tokens.data[0].refreshToken, {
         httpOnly: true,
         maxAge: 7 * 24 * 60 * 60 * 1000,
-        sameSite: 'strict',
-      });
-      res.cookie('accessToken', tokens.data[0].accessToken, {
-        httpOnly: true,
-        sameSite: 'strict',
-        maxAge: 15 * 60 * 1000,
+        sameSite: 'lax', // Или 'strict' для localhost
+        secure: true, // Отключаем для HTTP на localhost
+        domain: '.joyfy.online', // Явно указываем домен
       });
 
-      res.redirect(307, 'http://localhost:3000/auth/google/login-success');
+      res.cookie('accessToken', tokens.data[0].accessToken, {
+        httpOnly: true,
+        maxAge: 15 * 60 * 1000,
+        sameSite: 'lax',
+        secure: true, // Отключаем Secure для HTTP
+        domain: '.joyfy.online',
+
+      });
+
+
       this.emailService.sendWelcomeEmail(req.user.email)
+      // res.redirect(307, 'https://joyfy.online/auth/google/login-success')
+      // res.redirect(307, 'http://localhost:3000/auth/google/login-success');
+      res.redirect(307, 'https://dev.joyfy.online/auth/google/login-success')
+
 
     } catch (error) {
 
@@ -730,6 +751,15 @@ export class AuthController {
       this.prisma.account.deleteMany(),
       this.prisma.user.deleteMany(),
     ]);
+  }
+  @Get('check-auth')
+  async checkAuth(@Request() req, @Res() res: Response) {
+    const refreshToken = req.cookies.refreshToken;
+    const accessToken = req.cookies.accessToken;
+    if (!refreshToken || !accessToken) {
+      return res.status(401).json({ message: 'Not authenticated' });
+    }
+    return res.json({ message: 'Authenticated' });
   }
 }
 
