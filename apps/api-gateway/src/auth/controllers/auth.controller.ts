@@ -261,16 +261,19 @@ export class AuthController {
 
     res.cookie('refreshToken', tokens.refreshToken, {
       httpOnly: true,
-      secure: true,
-      sameSite: 'strict',
-      maxAge: 30 * 24 * 60 * 60 * 1000,
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+      sameSite: 'lax', // Или 'strict' для localhost
+      secure: true, // Отключаем для HTTP на localhost
+      domain: '.joyfy.online', // Явно указываем домен
     });
-
 
     res.cookie('accessToken', tokens.accessToken, {
       httpOnly: true,
-      sameSite: 'strict',
       maxAge: 15 * 60 * 1000,
+      sameSite: 'lax',
+      secure: true, // Отключаем Secure для HTTP
+      domain: '.joyfy.online',
+
     });
 
     return res.json({
@@ -426,15 +429,18 @@ export class AuthController {
       res.cookie('refreshToken', tokens.data[0].refreshToken, {
         httpOnly: true,
         maxAge: 7 * 24 * 60 * 60 * 1000,
-        sameSite: 'none', // обязательно
-        secure: true,     // обязательно, даже на localhost в Chrome (или будет проигнорировано)
+        sameSite: 'lax', // Или 'strict' для localhost
+        secure: true, // Отключаем для HTTP на localhost
+        domain: '.joyfy.online', // Явно указываем домен
       });
 
       res.cookie('accessToken', tokens.data[0].accessToken, {
         httpOnly: true,
         maxAge: 15 * 60 * 1000,
-        sameSite: 'none', // обязательно
-        secure: true,     // обязательно
+        sameSite: 'lax',
+        secure: true, // Отключаем Secure для HTTP
+        domain: '.joyfy.online',
+
       });
 
 
