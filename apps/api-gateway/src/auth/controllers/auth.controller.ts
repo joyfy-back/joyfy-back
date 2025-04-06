@@ -555,8 +555,8 @@ export class AuthController {
 
       this.emailService.sendWelcomeEmail(req.user.email)
       // res.redirect(307, 'https://joyfy.online/auth/google/login-success')
-      // res.redirect(307, 'http://localhost:3000/auth/google/login-success');
-      res.redirect(307, 'http://dev.joyfy.online/auth/google/login-success')
+      res.redirect(307, 'http://localhost:3000/auth/google/login-success');
+      // res.redirect(307, 'http://dev.joyfy.online/auth/google/login-success')
 
 
     } catch (error) {
