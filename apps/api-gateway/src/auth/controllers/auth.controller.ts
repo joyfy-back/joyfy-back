@@ -223,6 +223,7 @@ export class AuthController {
       httpOnly: true,
       secure: true
     });
+    return res.sendStatus(204);
   }
 
   @Get('me')
