@@ -109,7 +109,7 @@ export class EmailService {
           'Password Recovery',
           'To finish password recovery, please click the button below:',
           'Recover Password',
-          `https://joyfy.online/auth/password-recovery?recoveryCode=${recoveryPasswordCode}`,
+          `https://dev.joyfy.online/auth/password-recovery?recoveryCode=${recoveryPasswordCode}`,
         ),
       });
     }
@@ -122,7 +122,7 @@ export class EmailService {
         'Complete Registration',
         'To finish registration, please click the button below:',
         'Complete Registration',
-        `https://joyfy.online/auth/email-confirmed?code=${userCode}`,
+        `https://dev.joyfy.online/auth/email-confirmed?code=${userCode}`,
       ),
     });
   }
