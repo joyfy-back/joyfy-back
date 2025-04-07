@@ -196,7 +196,7 @@ export class AuthController {
   @ApiBearerAuth()
   @ApiResponse({ status: 204, description: 'User logged out successfully.' })
   @ApiResponse({ status: 401, description: 'Unauthorized.' })
-  async logout(@Request() req) {
+  async logout(@Request() req, @Res() res: Response) {
     const result: any =
       await this.authService.checkValidateUserSessionByRefreshToken(
         req.cookies.refreshToken,
@@ -209,6 +209,21 @@ export class AuthController {
     await this.commandBuse.execute(
       new DeleteSessionCommand(result.data[0].userId, result.data[0].deviceId),
     );
+
+    res.clearCookie('accessToken', {
+      domain: '.joyfy.online', // Укажите ваш домен
+      path: '/',
+      httpOnly: true,
+      secure: true
+    });
+
+    res.clearCookie('refreshToken', {
+      domain: '.joyfy.online', // Укажите ваш домен
+      path: '/',
+      httpOnly: true,
+      secure: true
+    });
+    return res.sendStatus(204);
   }
 
   @Get('me')
@@ -546,14 +561,14 @@ export class AuthController {
         maxAge: 7 * 24 * 60 * 60 * 1000,
         sameSite: 'lax',
         secure: true,
-        domain: '.joyfy.online', 
+        domain: '.joyfy.online',
       });
 
       res.cookie('accessToken', tokens.data[0].accessToken, {
         httpOnly: true,
         maxAge: 15 * 60 * 1000,
         sameSite: 'lax',
-        secure: true, 
+        secure: true,
         domain: '.joyfy.online',
 
       });
