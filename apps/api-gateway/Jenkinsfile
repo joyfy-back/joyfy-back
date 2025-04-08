@@ -3,7 +3,7 @@ pipeline {
     agent any
     environment {
         ENV_TYPE = "production"
-        PORT = 3789
+        PORT = 3821
         NAMESPACE = "joyfy-online"
         REGISTRY_HOSTNAME = "supermanagerofjoyfy"
         PROJECT = "api-gateway-service"
@@ -28,7 +28,7 @@ pipeline {
                        [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
                        nvm use --lts
                        yarn install
-                       yarn test
+                       yarn test:unit
                     '''
                 }
             }

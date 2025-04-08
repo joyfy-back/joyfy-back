@@ -1,447 +1,561 @@
-import { Injectable } from "@nestjs/common";
-import { EmailConfirmationWithUser, UserMapOutput, UserType } from "../type/auth.type";
-import { PrismaService } from "../../shared/prisma/prisma.service";
-import { Result } from "apps/api-gateway/generalTypes/errorResponseType";
-import { DeviceSessions, User } from "@prisma/client";
+import { Injectable } from '@nestjs/common';
+import { DeviceSessions, User } from '@prisma/client';
+import { EmailConfirmationWithUser, UserType } from '../type/auth.type';
+import { PrismaService } from '../../shared/prisma/prisma.service';
+import { formatErrorMessage } from '../../shared/libs/format-error-message';
+import { Result } from 'libs/shared/types';
+import { CreateAccountUserGithubCommand } from '../application/use-cases/create-account.user.github.use-case';
+import { CreateAccountUserGoogleCommand } from '../application/use-cases/create-account.user.google.use-case';
 
 @Injectable()
 export class AuthRepository {
-    constructor(protected prisma: PrismaService) { }
+  constructor(protected prisma: PrismaService) {}
 
-    async createUser(inputModul: UserType): Promise<Result> {
-        try {
+  async createUser(dto: UserType, account: any): Promise<Result<User>> {
+    try {
+      const user = await this.prisma.user.create({
+        data: {
+          username: dto.username,
+          email: dto.email,
+          passwordHash: dto.passwordHash,
+          agreeToTerms: dto.agreeToTerms,
+          emailConfirmation: {
+            create: {
+              confirmationCode: dto.emailConfirmation.confirmationCode,
+              expirationDate: dto.emailConfirmation.expirationDate,
+              isConfirmed: dto.emailConfirmation.isConfirmed,
+            },
+          },
+        },
+        include: {
+          emailConfirmation: true,
+        },
+      });
 
-            const user = await this.prisma.user.create({
-                data: {
-                    username: inputModul.username,
-                    email: inputModul.email,
-                    passwordHash: inputModul.passwordHash,
-                    agreeToTerms: inputModul.agreeToTerms,
-                    emailConfirmation: {
-                        create: {
-                            confirmationCode: inputModul.emailConfirmation.confirmationCode,
-                            expirationDate: inputModul.emailConfirmation.expirationDate,
-                            isConfirmed: inputModul.emailConfirmation.isConfirmed,
-                        },
-                    },
-                },
-                include: {
-                    emailConfirmation: true, // Включаем данные подтверждения email
-                },
-            });
-
-
-            return {
-                success: true,
-                message: 'user successfully created in db',
-                data: [user]
-            }
-
-        } catch (error) {
-            console.log(error)
-            return {
-                success: false,
-                message: 'failed to create user in db',
-                data: []
-            }
-
-        }
+      if (!account.isWasRegistered) {
+        await this.prisma.account.create({
+          data: {
+            userId: user.userId,
+          },
+        });
+      } else {
+        await this.prisma.account.update({
+          where: {
+            accountId: account.data[0].accountId,
+          },
+          data: {
+            userId: user.userId,
+          },
+        });
+      }
+      return {
+        success: true,
+        message: 'user successfully created in db',
+        data: [user],
+      };
+    } catch (error) {
+      console.log(error);
+      return {
+        success: false,
+        message: 'failed to create user in db',
+        data: [],
+      };
     }
+  }
+  async findUserByConfirmEmail(
+    code: string,
+  ): Promise<Result<EmailConfirmationWithUser>> {
+    try {
+      const emailConfirmation = await this.prisma.emailConfirmation.findFirst({
+        where: {
+          confirmationCode: code,
+        },
+        include: {
+          user: true,
+        },
+      });
 
-    async findUserByConfirEmail(code: string): Promise<Result<EmailConfirmationWithUser>> {
-        try {
+      if (!emailConfirmation) {
+        throw new Error();
+      }
 
-            const emailConfirmation = await this.prisma.emailConfirmation.findFirst({
-                where: {
-                    confirmationCode: code,
-                },
-                include: {
-                    user: true,
-                },
-            });
-
-
-            if (!emailConfirmation) {
-                throw new Error()
-            }
-
-            return {
-                success: true,
-                message: 'confirmation code is correct',
-                data: [emailConfirmation]
-            };
-
-        } catch (error) {
-            console.log(error)
-            return {
-                success: false,
-                message: 'confirmation code is incorrect',
-                data: []
-            }
-
-        }
+      return {
+        success: true,
+        message: 'confirmation code is correct',
+        data: [emailConfirmation],
+      };
+    } catch (error) {
+      console.log(error);
+      return {
+        success: false,
+        message: 'confirmation code is incorrect',
+        data: [],
+      };
     }
+  }
+  async updateConfirmation(userId: string): Promise<Result<never>> {
+    try {
+      const result = await this.prisma.emailConfirmation.updateMany({
+        where: {
+          userId: userId,
+        },
+        data: {
+          isConfirmed: true,
+        },
+      });
 
-    async updateConfirmation(userId: string): Promise<Result> {
-        try {
+      if (result.count === 0) {
+        throw new Error();
+      }
 
-            const result = await this.prisma.emailConfirmation.updateMany({
-                where: {
-                    userId: userId,
-                },
-                data: {
-                    isConfirmed: true,
-                },
-            });
+      return {
+        success: true,
+        message: 'mail confirmed',
+        data: [],
+      };
+    } catch (error) {
+      const message = 'Mail is not confirmed';
 
-            if (result.count === 0) {
-                throw new Error()
-            }
-
-            return {
-                success: true,
-                message: 'mail confirmed',
-                data: []
-            };
-
-        } catch (error) {
-
-            return {
-                success: false,
-                message: 'mail not confirmed',
-                data: []
-            };
-
-        }
+      return {
+        success: false,
+        message: formatErrorMessage(error, message),
+        data: [],
+      };
     }
+  }
+  async findIsEmail(email: string): Promise<Result<User>> {
+    try {
+      const user = await this.prisma.user.findUnique({
+        where: { email: email },
+      });
 
-    async findIsEmail(email: string): Promise<Result<User>> {
-        try {
-            const user = await this.prisma.user.findUnique({
-                where: { email: email },
-            });
+      if (!user) {
+        return {
+          success: false,
+          message: `No user with such email: ${email}`,
+          data: [],
+        };
+      }
 
-            if (!user) {
-                return {
-                    success: false,
-                    message: `No user with such email: ${email}`,
-                    data: [],
-                };
-            }
-
-            return {
-                success: true,
-                message: `There is a user with such email: ${email}`,
-                data: [user],
-            };
-        } catch (error) {
-            console.log(error)
-            return {
-                success: false,
-                message: 'An error occurred while searching for the user',
-                data: [],
-            };
-        }
+      return {
+        success: true,
+        message: `There is a user with such email: ${email}`,
+        data: [user],
+      };
+    } catch (error) {
+      console.log(error);
+      return {
+        success: false,
+        message: 'An error occurred while searching for the user',
+        data: [],
+      };
     }
+  }
 
-    async findIsUserName(username: string): Promise<Result<User>> {
-        try {
-            const user = await this.prisma.user.findUnique({
-                where: { username: username },
-            });
+  async createAccountAndGithubUser(dto: CreateAccountUserGithubCommand) {
+    try {
+      const result = this.prisma.$transaction(async (prisma) => {
+        const account = await prisma.account.create({
+          data: {},
+        });
 
-            if (!user) {
-                return {
-                    success: false,
-                    message: `No user with such username: ${username}`,
-                    data: [],
-                };
-            }
+        const githubUser = await prisma.githubUser.create({
+          data: {
+            githubId: dto.githubId,
+            username: dto.username,
+            email: dto.email,
+            accountId: account.accountId,
+          },
+        });
 
-            return {
-                success: true,
-                message: `There is a user with such username: ${username}`,
-                data: [user],
-            };
-        } catch (error) {
-            console.log(error)
-            return {
-                success: false,
-                message: 'An error occurred while searching for the user',
-                data: [],
-            };
-        }
+        return { account, githubUser };
+      });
+
+      if (!result) {
+        throw new Error();
+      }
+
+      return {
+        success: true,
+        message: 'the account created successfully',
+        data: [result],
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: '',
+        data: [],
+      };
     }
+  }
+  async createAccountAndGoogleUser(dto: CreateAccountUserGoogleCommand) {
+    try {
+      const result = await this.prisma.$transaction(async (prisma) => {
+        const account = await prisma.account.create({
+          data: {},
+        });
 
-    async addSessionUser(inputModul: DeviceSessions): Promise<Result> {
-        try {
-            await this.prisma.deviceSessions.create({
-                data: {
-                    deviceId: inputModul.deviceId,
-                    ip: inputModul.ip,
-                    lastActiveDate: inputModul.lastActiveDate.toString(),
-                    title: inputModul.title,
-                    userId: inputModul.userId,
-                },
-            });
+        const googleUser = await prisma.googleUser.create({
+          data: {
+            googleId: dto.googleId,
+            username: dto.username,
+            email: dto.email,
+            avatar: dto.avatar || 'opa',
+            accountId: account.accountId,
+          },
+        });
 
-            return {
-                success: true,
-                message: "session in the database recorded",
-                data: []
-            }
+        return { account, googleUser };
+      });
 
-        } catch (error) {
-            console.log(error)
-            return {
-                success: false,
-                message: "error writing to db session",
-                data: []
-            }
+      if (!result) {
+        throw new Error();
+      }
 
-        }
+      return {
+        success: true,
+        message: 'The account created successfully',
+        data: [result],
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: 'Failed to create account and Google user',
+        data: [],
+      };
     }
+  }
+  async findIsUserName(username: string): Promise<Result<User>> {
+    try {
+      const user = await this.prisma.user.findUnique({
+        where: { username: username },
+      });
 
-    async findRottenSessions(userId: string, deviceId: string): Promise<Result<DeviceSessions>> {
-        try {
-            const session = await this.prisma.deviceSessions.findFirst({
-                where: {
-                    deviceId: deviceId,
-                    userId: userId,
-                },
-            });
+      if (!user) {
+        return {
+          success: false,
+          message: `No user with such username: ${username}`,
+          data: [],
+        };
+      }
 
-            if (!session) {
-                return {
-                    success: false,
-                    message: 'session not found',
-                    data: [],
-                };
-            }
-
-            return {
-                success: true,
-                message: 'there is a session',
-                data: [session]
-
-            };
-        } catch (error) {
-            console.log(error);
-            return {
-                success: false,
-                message: 'error searching for session in db',
-                data: []
-            };
-        }
+      return {
+        success: true,
+        message: `There is a user with such username: ${username}`,
+        data: [user],
+      };
+    } catch (error) {
+      console.log(error);
+      return {
+        success: false,
+        message: 'An error occurred while searching for the user',
+        data: [],
+      };
     }
+  }
 
-    async completelyRemoveSesion(deviceId: string, userId: string): Promise<Result> {
-        try {
-            await this.prisma.deviceSessions.delete({
-                where: {
-                    deviceId: deviceId,
-                    userId: userId,
-                },
-            });
+  async addSessionUser(inputModul: DeviceSessions): Promise<Result<never>> {
+    try {
+      const existingUser = await this.prisma.user.findUnique({
+        where: { userId: inputModul.userId || undefined },
+      });
 
-            return {
-                success: true,
-                data: [],
-                message: 'successful removal'
-            }
+      await this.prisma.deviceSessions.create({
+        data: {
+          deviceId: inputModul.deviceId,
+          ip: inputModul.ip,
+          lastActiveDate: inputModul.lastActiveDate.toString(),
+          title: inputModul.title,
+          userId: existingUser ? inputModul.userId : null,
+        },
+      });
 
-        } catch (error) {
-            console.log(error, 'dfdfdfd')
-            return {
-                success: false,
-                data: [],
-                message: 'error while deleting'
-            }
-
-        }
+      return {
+        success: true,
+        message: 'session in the database recorded',
+        data: [],
+      };
+    } catch (error) {
+      console.log(error);
+      return {
+        success: false,
+        message: 'error writing to db session',
+        data: [],
+      };
     }
+  }
 
-    async updateSesion(iat: string, userId: string, diveceId: string): Promise<Result> {
+  async findRottenSessions(
+    userId: string,
+    deviceId: string,
+  ): Promise<Result<DeviceSessions>> {
+    try {
+      const session = await this.prisma.deviceSessions.findFirst({
+        where: {
+          deviceId: deviceId,
+        },
+      });
 
-        try {
-            await this.prisma.deviceSessions.update({
-                where: {
-                    deviceId: diveceId, // Ищем запись по старому deviceId
-                },
-                data: {
-                    lastActiveDate: iat, // Обновляем deviceId
-                },
-            });
+      if (!session) {
+        return {
+          success: false,
+          message: 'session not found',
+          data: [],
+        };
+      }
 
-            return {
-                success: true,
-                message: 'successful update Session ',
-                data: []
-            }
-
-
-        } catch (error) {
-            return {
-                success: false,
-                message: 'error during update',
-                data: []
-            }
-
-        }
-
+      return {
+        success: true,
+        message: 'there is a session',
+        data: [session],
+      };
+    } catch (error) {
+      console.log(error);
+      return {
+        success: false,
+        message: 'error searching for session in db',
+        data: [],
+      };
     }
+  }
 
-    async findBlogOrEmail(userOrEmail: string): Promise<Result> {
-        try {
-            const user = await this.prisma.user.findFirst({
-                where: {
-                    OR: [
-                        { username: userOrEmail },
-                        { email: userOrEmail },
-                    ],
-                },
-                include: {
-                    emailConfirmation: true,
-                },
-            });
+  async completelyRemoveSession(
+    deviceId: string,
+    userId: string,
+  ): Promise<Result<never>> {
+    try {
+      await this.prisma.deviceSessions.delete({
+        where: {
+          deviceId: deviceId,
+        },
+      });
 
-            if (!user) {
-                throw new Error()
-            }
-
-
-            return {
-                success: true,
-                message: 'there is a user with such email',
-                data: [user]
-            }
-
-
-        } catch (error) {
-            console.error(error);
-            return {
-                success: false,
-                message: 'no such user by email',
-                data: []
-            }
-        }
-
-
-
-
+      return {
+        success: true,
+        data: [],
+        message: 'successful removal',
+      };
+    } catch (error) {
+      console.log(error, 'dfdfdfd');
+      return {
+        success: false,
+        data: [],
+        message: 'error while deleting',
+      };
     }
+  }
 
-    async updateCodeUserByConfirEmail(userID: string, code: string): Promise<Result> {
-        try {
-            const result = await this.prisma.emailConfirmation.updateMany({
-                where: {
-                    userId: userID, // Фильтруем по userId
-                },
-                data: {
-                    confirmationCode: code, // Устанавливаем новое значение confirmationCode
-                },
-            });
+  async updateSession(
+    iat: string,
+    userId: string,
+    deviceId: string,
+  ): Promise<Result<never>> {
+    try {
+      await this.prisma.deviceSessions.update({
+        where: {
+          deviceId: deviceId, // Ищем запись по старому deviceId
+        },
+        data: {
+          lastActiveDate: iat, // Обновляем deviceId
+        },
+      });
 
-            if (result.count === 0) {
-                throw new Error()
-            }
-
-            return {
-                success: true,
-                message: 'successful setting of new confirmationCode value',
-                data: []
-
-            }
-        } catch (error) {
-
-            return {
-                success: false,
-                message: 'error about update',
-                data: []
-            }
-
-        }
-
-
+      return {
+        success: true,
+        message: 'successful update Session ',
+        data: [],
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: 'error during update',
+        data: [],
+      };
     }
+  }
 
-    async postPasswordRecoveryCode(code: string, email: string): Promise<Result> {
-        try {
-            await this.prisma.recoveryPassword.create({
-                data: {
-                    code: code,
-                    email: email,
-                },
-            });
+  async findBlogOrEmail(userOrEmail: string): Promise<Result<User>> {
+    try {
+      const user = await this.prisma.user.findFirst({
+        where: {
+          OR: [{ username: userOrEmail }, { email: userOrEmail }],
+        },
+        include: {
+          emailConfirmation: true,
+        },
+      });
 
-            return {
-                success: true,
-                message: 'successful creation',
-                data: []
-            }
-        } catch (error) {
+      if (!user) {
+        throw new Error();
+      }
 
-            return {
-                success: false,
-                data: [],
-                message: 'error creating',
-
-            }
-        }
-
-
+      return {
+        success: true,
+        message: 'there is a user with such email',
+        data: [user],
+      };
+    } catch (error) {
+      console.error(error);
+      return {
+        success: false,
+        message: 'no such user by email',
+        data: [],
+      };
     }
-    
-    async checkPasswordRecoveryCode(code: string): Promise<Result> {
-        try {
-            const result = await this.prisma.recoveryPassword.findFirst({
-                where: { code: code }
-            });
+  }
 
-            return {
-                success: true,
-                message: '',
-                data: [result]
-            };
-        } catch (error) {
-            console.error('Error finding recovery password record:', error);
-            return {
-                success: false,
-                message: '',
-                data: []
-            };
-        }
-    }
+  async updateCodeUserByConfirmEmail(
+    userID: string,
+    code: string,
+  ): Promise<Result<any>> {
+    try {
+      const result = await this.prisma.emailConfirmation.updateMany({
+        where: {
+          userId: userID, // Фильтруем по userId
+        },
+        data: {
+          confirmationCode: code, // Устанавливаем новое значение confirmationCode
+        },
+      });
 
-    async updatePassword(email: string, newPasswordHash: string) {
-        try {
-            const result = await this.prisma.user.updateMany({
-                where: { email: email }, 
-                data: {
-                    passwordHash: newPasswordHash, 
-                },
-            });
-    
-            if (result.count > 0) {
-                return {
-                    success: true,
-                    message: 'Password updated successfully',
-                    data: [result], 
-                };
-            } else {
-                return {
-                    success: false,
-                    message: 'User not found',
-                    data: [], 
-                };
-            }
-        } catch (error) {
-            console.error('Error updating password:', error);
-            return {
-                success: false,
-                message: 'Failed to update password',
-                data: [],
-            };
-        }
+      if (result.count === 0) {
+        throw new Error();
+      }
+
+      return {
+        success: true,
+        message: 'successful setting of new confirmationCode value',
+        data: [],
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: 'error about update',
+        data: [],
+      };
     }
+  }
+
+  async postPasswordRecoveryCode(
+    code: string,
+    email: string,
+  ): Promise<Result<never>> {
+    try {
+      await this.prisma.recoveryPassword.create({
+        data: {
+          code: code,
+          email: email,
+        },
+      });
+
+      return {
+        success: true,
+        message: 'successful creation',
+        data: [],
+      };
+    } catch (error) {
+      return {
+        success: false,
+        data: [],
+        message: 'error creating',
+      };
+    }
+  }
+
+  async checkPasswordRecoveryCode(code: string): Promise<Result<any>> {
+    try {
+      const result = await this.prisma.recoveryPassword.findFirst({
+        where: { code: code },
+      });
+
+      return {
+        success: true,
+        message: '',
+        data: [result],
+      };
+    } catch (error) {
+      console.error('Error finding recovery password record:', error);
+      return {
+        success: false,
+        message: '',
+        data: [],
+      };
+    }
+  }
+
+  async updatePassword(email: string, newPasswordHash: string) {
+    try {
+      const result = await this.prisma.user.updateMany({
+        where: { email: email },
+        data: {
+          passwordHash: newPasswordHash,
+        },
+      });
+
+      if (result.count > 0) {
+        return {
+          success: true,
+          message: 'Password updated successfully',
+          data: [result],
+        };
+      } else {
+        return {
+          success: false,
+          message: 'User not found',
+          data: [],
+        };
+      }
+    } catch (error) {
+      console.error('Error updating password:', error);
+      return {
+        success: false,
+        message: 'Failed to update password',
+        data: [],
+      };
+    }
+  }
+
+  async deleteAllSessionsExceptCurrent(deviceId: string, userId: string) {
+    try {
+      await this.prisma.deviceSessions.deleteMany({
+        where: {
+          userId: userId,
+          deviceId: { not: deviceId },
+        },
+      });
+
+      return {
+        success: true,
+        message: 'successful delete for sessions in db',
+        data: [],
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: formatErrorMessage(error, 'failed database query'),
+        data: [],
+      };
+    }
+  }
+
+  async deleteSessionById(deviceId: string) {
+    try {
+      await this.prisma.deviceSessions.delete({
+        where: {
+          deviceId: deviceId,
+        },
+      });
+      return {
+        success: true,
+        message: '',
+        data: [],
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: formatErrorMessage(error, 'failed database query'),
+        data: [],
+      };
+    }
+  }
 }
