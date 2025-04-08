@@ -211,14 +211,14 @@ export class AuthController {
     );
 
     res.clearCookie('accessToken', {
-      domain: '.joyfy.online', // Укажите ваш домен
+      domain: '.joyfy.online', 
       path: '/',
       httpOnly: true,
       secure: true
     });
 
     res.clearCookie('refreshToken', {
-      domain: '.joyfy.online', // Укажите ваш домен
+      domain: '.joyfy.online',
       path: '/',
       httpOnly: true,
       secure: true
