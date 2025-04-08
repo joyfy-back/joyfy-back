@@ -23,6 +23,9 @@
     "build:api-gateway": "nest build api-gateway",
     "start:api-gateway": "node dist/apps/api-gateway/main",
     "start:dev:api-gateway": "nest start api-gateway --watch",
+    "build:posts": "nest build posts",
+    "start:posts": "node dist/apps/posts/main",
+    "start:dev:posts": "nest start api-gateway --watch",
     "build:files": "nest build files",
     "start:files": "node dist/apps/files/main",
     "start:dev:files": "nest start files --watch"
