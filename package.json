@@ -20,6 +20,7 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "npx prisma generate && npx cross-env ENV=TEST jest --config ./apps/api-gateway/test/jest-e2e.json",
+    "testposts:e2e": "jest --config ./apps/posts/test/jest-e2e.json",
     "build:api-gateway": "nest build api-gateway",
     "start:api-gateway": "node dist/apps/api-gateway/main",
     "start:dev:api-gateway": "nest start api-gateway --watch",
