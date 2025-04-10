@@ -14,6 +14,8 @@ export class LoginUserCommand {
     public userAgent: string,
     public ip: string,
     public email: string,
+    public isOAuthGoogleProvider?: boolean,
+    public isOAuthGithubProvider?: boolean
   ) {}
 }
 
@@ -32,7 +34,18 @@ export class LoginUserUseCase implements ICommandHandler<LoginUserCommand> {
         userId: dto.userId,
         deviceId: deviceId,
         email: dto.email,
+        isOAuthProvider: false,
+        authProvider: ''
       };
+      if (dto.isOAuthGithubProvider || dto.isOAuthGoogleProvider) {
+        payload.isOAuthProvider = true; 
+    
+        if (dto.isOAuthGithubProvider) {
+          payload.authProvider = 'github';
+        } else if (dto.isOAuthGoogleProvider) {
+          payload.authProvider = 'google';
+        }
+      }
 
       const tokens = {
         accessToken: this.jwtService.sign(payload),

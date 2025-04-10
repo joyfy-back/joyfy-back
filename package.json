@@ -27,7 +27,7 @@
     "test:files:unit": "jest --config ./apps/files/test/jest-unit.json",
     "build:api-gateway": "nest build api-gateway",
     "start:api-gateway": "node dist/apps/api-gateway/main",
-    "start:dev:api-gateway": "nest start api-gateway --watch",
+    "start:dev:api-gateway": "nest start api-gateway --debug --watch",
     "build:posts": "nest build posts",
     "start:posts": "node dist/apps/posts/main",
     "start:dev:posts": "nest start posts --watch",

@@ -166,6 +166,7 @@ export class AuthController {
     if (!tokens.success) {
       throw new HttpException('UNAUTHORIZED', HttpStatus.UNAUTHORIZED);
     }
+    
     res.cookie('refreshToken', tokens.data[0].refreshToken, {
       httpOnly: true,
       maxAge: 7 * 24 * 60 * 60 * 1000,
@@ -182,7 +183,6 @@ export class AuthController {
       domain: '.joyfy.online',
 
     });
-
 
     return res.json({
       success: true,
@@ -209,6 +209,8 @@ export class AuthController {
     await this.commandBuse.execute(
       new DeleteSessionCommand(result.data[0].userId, result.data[0].deviceId),
     );
+
+    await this.authService.checkProvider(req.cookies.refreshToken)
 
     res.clearCookie('accessToken', {
       domain: '.joyfy.online',
@@ -440,6 +442,8 @@ export class AuthController {
           userAgent,
           req.ip,
           req.user.email,
+          false,
+          true
         ),
       );
 
@@ -502,7 +506,7 @@ export class AuthController {
     },
   })
   async gitOauthGitHub(@Request() req, @Res() res: Response) {
-    const result = await this.authService.getOauthGitHub(true);
+    const result = await this.authService.getOauthGitHub();
 
     if (!result.success) {
       throw new HttpException(
@@ -555,6 +559,8 @@ export class AuthController {
           userAgent,
           req.ip,
           req.user.email,
+          true,
+          false
         ),
       );
       res.cookie('refreshToken', tokens.data[0].refreshToken, {
@@ -620,7 +626,7 @@ export class AuthController {
     },
   })
   async gitOauthGoogle(@Request() req, @Res() res: Response) {
-    const result = await this.authService.getOauthGoogle(true);
+    const result = await this.authService.getOauthGoogle();
 
     if (!result.success) {
       throw new HttpException(
