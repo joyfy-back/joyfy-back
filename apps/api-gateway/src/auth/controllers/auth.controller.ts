@@ -211,7 +211,7 @@ export class AuthController {
     );
 
     res.clearCookie('accessToken', {
-      domain: '.joyfy.online', 
+      domain: '.joyfy.online',
       path: '/',
       httpOnly: true,
       secure: true
@@ -414,7 +414,11 @@ export class AuthController {
       if (!req.user) {
         throw new UnauthorizedException('GitHub authentication failed');
       }
-      await this.authQueryRepository.getGitHubAccount(req.user.email)
+      const account = await this.authQueryRepository.getGitHubAccount(req.user.email)
+
+      if (!account?.success) {
+        throw new Error(account?.message)
+      }
 
 
       const result = await this.commandBuse.execute(
@@ -426,10 +430,7 @@ export class AuthController {
       );
 
       if (!result.success) {
-        throw new HttpException(
-          `${result.message}`,
-          HttpStatus.INTERNAL_SERVER_ERROR,
-        );
+        throw new Error('registration_failed')
       }
 
       const tokens: Result<TokensType> = await this.commandBuse.execute(
@@ -464,7 +465,7 @@ export class AuthController {
     } catch (error) {
       console.error('GitHub auth error:', error);
       return res.redirect(
-        'https://dev.joyfy.online/auth/login?error=github_failed',
+        `https://dev.joyfy.online/auth/login?error=${error}`,
       );
     }
   }
@@ -531,7 +532,7 @@ export class AuthController {
       const googleEmail = await this.authQueryRepository.getGoogleAccount(req.user.email)
 
       if (!googleEmail.success) {
-        throw new Error('Пользователь с таким email уже зарегистрирован через GitHub')
+        throw new Error(googleEmail.message)
       }
 
 
@@ -544,7 +545,7 @@ export class AuthController {
         ),
       );
       if (!result.success) {
-        throw new Error()
+        throw new Error('registration_failed')
       }
 
       const tokens: Result<TokensType> = await this.commandBuse.execute(
@@ -582,7 +583,7 @@ export class AuthController {
 
       console.error('GitHub auth error:', error);
       return res.redirect(
-        'https://dev.joyfy.online/auth/login?error=google_failed',
+        `https://dev.joyfy.online/auth/login?error=${error}`,
       );
     }
   }
