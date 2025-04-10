@@ -59,6 +59,6 @@ async function bootstrap() {
   app.setGlobalPrefix('/api/v1');
   app.use(cookieParser());
 
-  await app.listen(apiSettings.PORT ?? 3000);
+  await app.listen(apiSettings.PORT ?? 3003);
 }
 void bootstrap();
