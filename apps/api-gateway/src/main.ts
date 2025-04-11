@@ -9,6 +9,9 @@ import {
   SWAGGER_SERVER,
   SWAGGER_TITLE,
 } from './shared/constants/swagger';
+import { BadRequestException, ValidationPipe } from '@nestjs/common';
+import { AllExceptionsFilter } from 'utils/exception-filters/http-exception-filter';
+import { useContainer } from 'class-validator';
 
 async function bootstrap() {
   const app = await NestFactory.create(ApiGatewayModule);
@@ -31,6 +34,7 @@ async function bootstrap() {
     credentials: true,
   });
 
+  useContainer(app.select(ApiGatewayModule), { fallbackOnErrors: true });
   const config = new DocumentBuilder()
     .setTitle(SWAGGER_TITLE)
     .setDescription(SWAGGER_DESCRIPTION)
@@ -52,6 +56,31 @@ async function bootstrap() {
       persistAuthorization: true,
     },
   });
+  app.useGlobalPipes(
+    new ValidationPipe({
+        transform: true,
+        stopAtFirstError: true,
+        exceptionFactory: (errors) => {
+            const customErrors: { message: string; field: string }[] = [];
+
+            errors.forEach((e) => {
+                if (e.constraints) {
+                    const constraintKeys = Object.keys(e.constraints);
+
+                    constraintKeys.forEach((cKey) => {
+                        const msg = e.constraints![cKey];
+
+                        customErrors.push({ message: msg, field: e.property });
+                    });
+                }
+            });
+
+            throw new BadRequestException(customErrors);
+        },
+    }),
+);
+  app.useGlobalFilters(new AllExceptionsFilter());
+
 
   const configService = app.get(ConfigService<ConfigurationType, true>);
   const apiSettings = configService.get('apiSettings', { infer: true });

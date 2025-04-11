@@ -10,14 +10,19 @@ import { AuthRepository } from '../../infrastructure/auth.repository';
 @ValidatorConstraint({ name: 'EmailIsExist', async: true })
 @Injectable()
 export class EmailIsExistConstraint implements ValidatorConstraintInterface {
-  constructor(protected authRepository: AuthRepository) {}
+  constructor(private authRepository: AuthRepository) {}
 
   async validate(value: string) {
     const { success } = await this.authRepository.findIsEmail(value);
 
     return !success;
   }
+  defaultMessage() {
+    return 'Email already exists';
+  }
+
 }
+
 
 export function EmailIsExist(
   property?: string,
