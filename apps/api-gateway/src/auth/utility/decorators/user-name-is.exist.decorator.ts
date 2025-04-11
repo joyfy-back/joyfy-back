@@ -7,7 +7,7 @@ import {
 } from 'class-validator';
 import { AuthRepository } from '../../infrastructure/auth.repository';
 
-@ValidatorConstraint({ name: 'UserNameIsExist', async: true })
+@ValidatorConstraint({ name: 'NameIsExist', async: true })
 @Injectable()
 export class UserNameIsExistConstraint implements ValidatorConstraintInterface {
   constructor(protected authRepository: AuthRepository) {}
@@ -17,9 +17,13 @@ export class UserNameIsExistConstraint implements ValidatorConstraintInterface {
 
     return !success;
   }
+  defaultMessage() {
+    return 'Username already exists';
+  }
+
 }
 
-export function UserNameIsExist(
+export function NameIsExist(
   property?: string,
   validationOptions?: ValidationOptions,
 ) {

@@ -3,7 +3,6 @@ import { AuthController } from './controllers/auth.controller';
 import { AuthRepository } from './infrastructure/auth.repository';
 import { AuthService } from './application/auth.service';
 import { CqrsModule } from '@nestjs/cqrs';
-import { UserNameIsExistConstraint } from './utility/decorators/user-name-is.exist.decorator';
 import { JwtModule } from '@nestjs/jwt';
 import { EmailService } from './application/email.service';
 import { EmailIsExistConstraint } from './utility/decorators/email-is-exist.decorator';
@@ -25,6 +24,7 @@ import { CreateAccountUserGithubUseCase } from './application/use-cases/create-a
 import { GithubStrategy } from './strategy/github.strategy';
 import { GoogleStrategy } from './strategy/google.strategy';
 import { CreateAccountUserGoogleUseCase } from './application/use-cases/create-account.user.google.use-case';
+import { UserNameIsExistConstraint } from './utility/decorators/user-name-is.exist.decorator';
 
 const authProviders: Provider[] = [
   AuthRepository,

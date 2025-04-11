@@ -9,6 +9,9 @@ import {
   Equals,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { Match } from '../../utility/decorators/match.decorator';
+import { EmailIsExist } from '../../utility/decorators/email-is-exist.decorator';
+import { NameIsExist } from '../../utility/decorators/user-name-is.exist.decorator';
 
 export class UserCreateInputDto {
   @ApiProperty({ example: 'john_doe', description: 'Username' })
@@ -19,10 +22,12 @@ export class UserCreateInputDto {
     message:
       'Username can only contain letters, numbers, underscores (_), and hyphens (-)',
   })
+  @NameIsExist()
   username: string;
 
   @ApiProperty({ example: 'john@example.com', description: 'User email' })
   @IsEmail({}, { message: 'Invalid email format' })
+  @EmailIsExist()
   email: string;
 
   @ApiProperty({ example: 'Password123!', description: 'User password' })
@@ -41,7 +46,7 @@ export class UserCreateInputDto {
   })
   @IsString()
   @IsNotEmpty({ message: 'Password confirmation is required' })
-  @Equals('password', { message: 'Passwords do not match' })
+  @Match('password', { message: 'Passwords do not match' }) // <-- Заменили @Equals
   passwordConfirmation: string;
 
   @ApiProperty({ example: true, description: 'Agree to terms' })
