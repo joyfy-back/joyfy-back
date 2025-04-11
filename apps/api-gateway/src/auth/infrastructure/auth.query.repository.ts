@@ -124,7 +124,11 @@ export class AuthQueryRepository {
         throw new Error('user_exists')
       }
   
-      return githubUser;
+      return {
+        success: true,
+        message: '',
+        data: [],
+      };
   
     } catch (error) {
       return {
