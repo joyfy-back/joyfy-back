@@ -558,4 +558,15 @@ export class AuthRepository {
       };
     }
   }
-}
+
+  async deleteGoogleAccount(googleId: string) {
+    await this.prisma.account.deleteMany({
+      where: { GooglebUser: { googleId } },
+    });
+  }
+  
+  async deleteGitHubAccount(gitHubId: string) {
+    await this.prisma.account.deleteMany({
+      where: { GithubUser: { githubId: gitHubId } },
+    });
+  }}

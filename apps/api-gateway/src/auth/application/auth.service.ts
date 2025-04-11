@@ -82,11 +82,11 @@ export class AuthService {
 
   async updateToken(accessToken: any) {
     const data = this.jwtService.decode(accessToken)
-    console.log(data,'datadatadata')
+    console.log(data, 'datadatadata')
     const payloads = {
       userName: data.userName || 'null',
       userId: data.userId || 'null',
-      deviceId: data.deviceId|| 'null',
+      deviceId: data.deviceId || 'null',
       email: data.email || 'null',
     };
     const tokens = {
@@ -125,18 +125,16 @@ export class AuthService {
       };
     }
   }
-  async getOauthGitHub(isLocalHost: boolean) {
+
+  async getOauthGitHub() {
     try {
       const state = crypto.randomBytes(16).toString('hex');
       const scope = 'user:email read:user';
+      const apiSettings = this.configService.get('apiSettings', { infer: true });
 
       const params = {
-        client_id: isLocalHost
-          ? 'Ov23linfRpuNdG9dqBPE'
-          : this.configService.get('apiSettings.GITHUB_CLIENT_ID'),
-        redirect_uri: isLocalHost
-          ? 'https://gateway.joyfy.online/api/v1/auth/github/callback'
-          : this.configService.get('apiSettings.GITHUB_CALLBACK_URL'),
+        client_id: apiSettings.GITHUB_CLIENT_ID,
+        redirect_uri: apiSettings.GITHUB_CALLBACK_URL,
         scope: scope,
         state: state,
       };
@@ -158,7 +156,8 @@ export class AuthService {
       };
     }
   }
-  async getOauthGoogle(isLocalHost: boolean) {
+
+  async getOauthGoogle() {
     try {
       const state = crypto.randomBytes(16).toString('hex');
       const config = this.configService.get('apiSettings')
@@ -168,11 +167,10 @@ export class AuthService {
         redirect_uri: 'https://gateway.joyfy.online/api/v1/auth/google/callback',
         response_type: 'code',
         scope: 'openid email profile',
-        state: state, // Для защиты от CSRF
-        prompt: 'consent' // Принудительно запрашивает разрешения
+        state: state,
+        prompt: 'consent'
       };
 
-      // Формируем URL для перенаправления
       const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?${new URLSearchParams(params)}`;
 
       return {
@@ -189,5 +187,19 @@ export class AuthService {
       };
     }
   }
+  
+  async checkProvider(refreshToken: string) {
+    const res = this.jwtService.decode(refreshToken)
 
+    if(res.authProvider === 'google'){
+      
+      await this.authRepository.deleteGoogleAccount(res.userId)
+
+    } else if(res.authProvider === 'github') {
+
+      await this.authRepository.deleteGitHubAccount(res.userId)
+
+    }
+
+  }
 }

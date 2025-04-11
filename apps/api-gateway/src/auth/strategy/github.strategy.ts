@@ -10,9 +10,9 @@ export class GithubStrategy extends PassportStrategy(Strategy, 'github') {
     const apiSettings = configService.get('apiSettings', { infer: true });
 
     const settingsGitHub = {
-      clientID: 'Ov23linfRpuNdG9dqBPE',
-      clientSecret: '474e1146c2fb9fc73cde3686969c43ec38cb0a7e',
-      callbackURL: 'https://gateway.joyfy.online/api/v1/auth/github/callback',
+      clientID: apiSettings.GITHUB_CLIENT_ID,
+      clientSecret: apiSettings.GITHUB_CLIENT_SECRET,
+      callbackURL:apiSettings.GITHUB_CALLBACK_URL,
       scope: ['user:email', 'read:user'],
       passReqToCallback: true,
     } as unknown as StrategyOptions;
