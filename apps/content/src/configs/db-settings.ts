@@ -4,5 +4,5 @@ import { EnvironmentVariable } from './configuration';
 export class DbSettings {
   constructor(private environmentVariables: EnvironmentVariable) {}
   @IsString()
-  API_GATEWAY_DATABASE_URL: string = String(this.environmentVariables.API_GATEWAY_DATABASE_URL);
+  CONTENT_DATABASE_URL: string = String(this.environmentVariables.CONTENT_DATABASE_URL);
 }

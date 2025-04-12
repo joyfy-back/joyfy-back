@@ -1,5 +1,5 @@
 import { INestApplication } from '@nestjs/common';
-import { PrismaService } from 'apps/api-gateway/src/shared/prisma/prisma.service';
+import { PrismaService } from '../../apps/api-gateway/prisma/prisma.service';
 import * as request from 'supertest';
 
 export class AuthTestManager {

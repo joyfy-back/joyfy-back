@@ -3,7 +3,7 @@ import { INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
 import { ApiGatewayModule } from './../src/api-gateway.module';
 import { AuthTestManager } from '../../../__tests__/utils/auth-test-manager';
-import { PrismaService } from '../src/shared/prisma/prisma.service';
+import { PrismaService } from '../prisma/prisma.service';
 import { JwtService } from '@nestjs/jwt';
 import { SharedModule } from '../src/shared/shared.module';
 import { EmailAdapterMock } from '../../../__tests__/mock/email.adapter.mock';
