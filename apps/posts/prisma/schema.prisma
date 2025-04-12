@@ -16,3 +16,12 @@ model Posts {
 
   @@map("posts")
 }
+
+model Comment {
+  commetId            String             @id @default(uuid())
+  username          String             @unique
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+
+  @@map("comments")
+}
