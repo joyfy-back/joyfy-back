@@ -30,7 +30,7 @@
     "start:dev:api-gateway": "nest start api-gateway --watch",
     "build:posts": "nest build posts",
     "start:posts": "node dist/apps/posts/main",
-    "start:dev:posts": "nest start posts --watch",
+    "start:dev:posts": "npx dotenv -e .env -- nest start posts --watch",
     "build:files": "nest build files",
     "start:files": "node dist/apps/files/main",
     "start:dev:files": "nest start files --watch"
