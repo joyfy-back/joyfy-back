@@ -20,7 +20,7 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:api-gateway:e2e": "npx dotenv -e .env.test -- prisma generate --schema=./apps/api-gateway/prisma/schema.prisma && npx dotenv -e .env.test -- npx cross-env ENV=TEST jest --config ./apps/api-gateway/test/jest-e2e.json",
-    "test:api-gateway:unit": "npx cross-env ENV=TEST jest --config ./apps/api-gateway/test/jest-unit.json",
+    "test:api-gateway:unit": "npx dotenv -e .env.test -- prisma generate --schema=./apps/api-gateway/prisma/schema.prisma && npx dotenv -e .env.test -- npx cross-env ENV=TEST jest --config ./apps/api-gateway/test/jest-unit.json",
     "test:posts:e2e": "npx dotenv -e .env.test -- prisma generate --schema=./apps/posts/prisma/schema.prisma && npx dotenv -e .env.test -- npx cross-env ENV=TEST jest --config ./apps/posts/test/jest-e2e.json",
     "testposts:unit": "jest --config ./apps/posts/test/jest-unit.json",
     "test:files:e2e": "jest --config ./apps/files/test/jest-e2e.json",

@@ -47,7 +47,6 @@ import { JwtService } from '@nestjs/jwt';
 import { CreateAccountUserGithubCommand } from '../application/use-cases/create-account.user.github.use-case';
 import { CreateAccountUserGoogleCommand } from '../application/use-cases/create-account.user.google.use-case';
 import { RecaptchaService } from '../application/recaptcha.service';
-import axios from 'axios';
 import { PrismaService } from '../../../prisma/prisma.service';
 
 @Controller('auth')
