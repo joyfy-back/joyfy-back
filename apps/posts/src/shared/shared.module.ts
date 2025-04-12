@@ -23,6 +23,7 @@ import { PrismaService } from "../../prisma/prisma.service"
       useFactory: (config: ConfigService) => {
         const url = config.get('dbSettings', { infer: true });
 
+        console.log(url.CONTENT_DATABASE_URL, 'url.CONTENT_DATABASE_URLurl.CONTENT_DATABASE_URLurl.CONTENT_DATABASE_URL')
         const prismaService = new PrismaService({
           url: url.CONTENT_DATABASE_URL,
         });
