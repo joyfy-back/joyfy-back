@@ -24,7 +24,7 @@ import { PrismaService } from "../../prisma/prisma.service"
         const url = config.get('dbSettings', { infer: true });
 
         const prismaService = new PrismaService({
-          url: url.DATABASE_URL,
+          url: url.CONTENT_DATABASE_URL,
         });
 
         return prismaService;

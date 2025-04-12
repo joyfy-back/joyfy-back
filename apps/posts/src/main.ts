@@ -11,7 +11,7 @@ async function bootstrap() {
   const apiSettings = configService.get('apiSettings', { infer: true });
   const dbSettings = configService.get('dbSettings', { infer: true });
 
-  console.log(dbSettings.DATABASE_URL)
+  console.log(dbSettings.CONTENT_DATABASE_URL)
 
   await app.listen(apiSettings.PORT ?? 3022);
 }

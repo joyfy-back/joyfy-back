@@ -21,7 +21,7 @@
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "npx prisma generate && npx cross-env ENV=TEST jest --config ./apps/api-gateway/test/jest-e2e.json",
     "test:unit": "npx cross-env ENV=TEST jest --config ./apps/api-gateway/test/jest-unit.json",
-    "testposts:e2e": "npx dotenv -e .env.test -- prisma generate --schema=./apps/posts/prisma/schema.prisma && npx dotenv -e .env.test -- npx cross-env ENV=TEST jest --config ./apps/posts/test/jest-e2e.json",
+    "testposts:e2e": "npx cross-env ENV=TEST && npx prisma generate --schema=./apps/posts/prisma/schema.prisma && jest --config ./apps/posts/test/jest-e2e.json",
     "testposts:unit": "jest --config ./apps/posts/test/jest-unit.json",
     "test:files:e2e": "jest --config ./apps/files/test/jest-e2e.json",
     "test:files:unit": "jest --config ./apps/files/test/jest-unit.json",
@@ -30,7 +30,7 @@
     "start:dev:api-gateway": "nest start api-gateway --watch",
     "build:posts": "nest build posts",
     "start:posts": "node dist/apps/posts/main",
-    "start:dev:posts": "npx dotenv -e .env -- nest start posts --watch",
+    "start:dev:posts": "nest start posts --watch",
     "build:files": "nest build files",
     "start:files": "node dist/apps/files/main",
     "start:dev:files": "nest start files --watch"
