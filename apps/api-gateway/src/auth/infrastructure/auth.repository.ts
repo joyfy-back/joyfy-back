@@ -1,11 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { DeviceSessions, User } from '@prisma/client';
 import { EmailConfirmationWithUser, UserType } from '../type/auth.type';
-import { PrismaService } from '../../shared/prisma/prisma.service';
 import { formatErrorMessage } from '../../shared/libs/format-error-message';
 import { Result } from 'libs/shared/types';
 import { CreateAccountUserGithubCommand } from '../application/use-cases/create-account.user.github.use-case';
 import { CreateAccountUserGoogleCommand } from '../application/use-cases/create-account.user.google.use-case';
+import { PrismaService } from '../../../prisma/prisma.service';
 
 @Injectable()
 export class AuthRepository {

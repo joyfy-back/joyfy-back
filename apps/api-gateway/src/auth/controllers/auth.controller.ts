@@ -48,7 +48,7 @@ import { CreateAccountUserGithubCommand } from '../application/use-cases/create-
 import { CreateAccountUserGoogleCommand } from '../application/use-cases/create-account.user.google.use-case';
 import { RecaptchaService } from '../application/recaptcha.service';
 import axios from 'axios';
-import { PrismaService } from '../../shared/prisma/prisma.service';
+import { PrismaService } from '../../../prisma/prisma.service';
 
 @Controller('auth')
 export class AuthController {

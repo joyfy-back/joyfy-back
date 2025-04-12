@@ -1,9 +1,9 @@
 import { Global, Module } from '@nestjs/common';
-import { PrismaService } from './prisma/prisma.service';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import configuration from '../configs/configuration';
 import { Environments } from '../configs/env-setings';
 import { getEnvFilePath } from '../configs/getEnvFilePath';
+import { PrismaService } from '../../prisma/prisma.service';
 
 @Global()
 @Module({
@@ -24,7 +24,7 @@ import { getEnvFilePath } from '../configs/getEnvFilePath';
         const url = config.get('dbSettings', { infer: true });
 
         const prismaService = new PrismaService({
-          url: url.DATABASE_URL,
+          url: url.API_GATEWAY_DATABASE_URL,
         });
 
         return prismaService;

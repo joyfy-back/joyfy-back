@@ -1,7 +1,7 @@
 import { ConflictException, Injectable } from '@nestjs/common';
-import { PrismaService } from '../../shared/prisma/prisma.service';
 import { Result } from 'libs/shared/types';
 import { formatErrorMessage } from '../../shared/libs/format-error-message';
+import { PrismaService } from '../../../prisma/prisma.service';
 
 @Injectable()
 export class AuthQueryRepository {
