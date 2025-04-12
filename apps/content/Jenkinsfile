@@ -3,13 +3,13 @@ pipeline {
     agent any
     environment {
         ENV_TYPE = "production"
-        PORT = 3833
+        PORT = 3836
         NAMESPACE = "joyfy-online"
         REGISTRY_HOSTNAME = "supermanagerofjoyfy"
-        PROJECT = "api-posts-service"
-        SERVICE="posts"
+        PROJECT = "api-content-service"
+        SERVICE="content"
         REGISTRY = "registry.hub.docker.com"
-        DEPLOYMENT_NAME = "api-posts-service-deployment"
+        DEPLOYMENT_NAME = "api-content-service-deployment"
         IMAGE_NAME = "${env.BUILD_ID}_${env.ENV_TYPE}_${env.GIT_COMMIT}"
         DOCKER_BUILD_NAME = "${env.REGISTRY_HOSTNAME}/${env.PROJECT}:${env.IMAGE_NAME}"
     }
@@ -28,7 +28,7 @@ pipeline {
                        [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
                        nvm use --lts
                        yarn install
-                       yarn testposts:unit
+                       yarn test:content:unit
                     '''
                 }
             }
@@ -40,7 +40,7 @@ pipeline {
                        export NVM_DIR="$HOME/.nvm"
                        [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
                        nvm use --lts
-                       yarn test:posts:e2e
+                       yarn test:content:e2e
                     '''
                 }
             }

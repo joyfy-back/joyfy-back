@@ -25,5 +25,5 @@ spec:
              - name: CONTENT_DATABASE_URL
                valueFrom:
                  secretKeyRef:
-                   name: api-posts-service-production-config-secret
+                   name: api-content-service-production-config-secret
                    key: CONTENT_DATABASE_URL
