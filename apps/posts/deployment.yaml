@@ -22,8 +22,8 @@ spec:
              - containerPort: PORT_CONTAINER
 
            env:
-             - name: DATABASE_URL
+             - name: CONTENT_DATABASE_URL
                valueFrom:
                  secretKeyRef:
                    name: api-posts-service-production-config-secret
-                   key: DATABASE_URL
+                   key: CONTENT_DATABASE_URL
