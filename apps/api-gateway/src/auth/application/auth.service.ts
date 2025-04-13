@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as crypto from 'crypto';
-import { User } from '@prisma/client';
 import { verify } from 'argon2';
 import { AuthRepository } from '../infrastructure/auth.repository';
 import { formatErrorMessage } from '../../shared/libs/format-error-message';
@@ -9,6 +8,7 @@ import { Result } from 'libs/shared/types';
 import { ConfigService } from '@nestjs/config';
 import axios from 'axios';
 import { ParamQueryType } from '../type/auth.type';
+import { User } from 'apps/api-gateway/prisma/generated/prisma-client-content';
 
 @Injectable()
 export class AuthService {

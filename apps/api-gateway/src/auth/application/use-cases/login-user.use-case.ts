@@ -1,11 +1,11 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { JwtService } from '@nestjs/jwt';
 import { v4 as uuidv4 } from 'uuid';
-import { DeviceSessions } from '@prisma/client';
 import { AuthRepository } from '../../infrastructure/auth.repository';
 import { TokensType } from '../../type/auth.type';
 import { formatErrorMessage } from '../../../shared/libs/format-error-message';
 import { Result } from '../../../../../../libs/shared/types';
+import { DeviceSessions } from 'apps/api-gateway/prisma/generated/prisma-client-content';
 
 export class LoginUserCommand {
   constructor(

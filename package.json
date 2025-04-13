@@ -27,13 +27,12 @@
     "test:files:e2e": "jest --config ./apps/files/test/jest-e2e.json",
     "build:api-gateway": "nest build api-gateway",
     "start:api-gateway": "node dist/apps/api-gateway/main",
-    "start:dev:api-gateway": "npx dotenv -e .env -- nest start api-gateway --watch",
-    "build:content": "nest build content",
+    "start:dev:api-gateway": "npx prisma generate --schema=./apps/api-gateway/prisma/schema.prisma && npx dotenv -e .env -- nest start api-gateway --watch",    "build:content": "nest build content",
     "start:content": "node dist/apps/content/main",
-    "start:dev:content": "npx dotenv -e .env -- nest start content --watch",
-    "build:files": "nest build files",
+    "start:dev:content": "npx prisma generate --schema=./apps/content/prisma/schema.prisma && npx dotenv -e .env -- nest start content --watch",    "build:files": "nest build files",
     "start:files": "node dist/apps/files/main",
-    "start:dev:files": "nest start files --watch"
+    "start:dev:files": "nest start files --watch",
+    "prisma:generate": "npx prisma generate --schema=./apps/api-gateway/prisma/schema.prisma && npx prisma generate --schema=./apps/content/prisma/schema.prisma && npx prisma generate --schema=./apps/files/prisma/schema.prisma"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.1",
@@ -41,6 +40,7 @@
     "@nestjs/core": "^11.0.1",
     "@nestjs/cqrs": "^11.0.2",
     "@nestjs/jwt": "^11.0.0",
+    "@nestjs/microservices": "^11.0.16",
     "@nestjs/passport": "^11.0.5",
     "@nestjs/platform-express": "^11.0.1",
     "@nestjs/swagger": "^11.0.7",

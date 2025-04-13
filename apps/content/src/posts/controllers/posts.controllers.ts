@@ -1,4 +1,4 @@
-import { Controller, Get } from "@nestjs/common";
+import { Controller, Get, Post } from "@nestjs/common";
 import { PrismaService } from "../../../prisma/prisma.service"
 
 
@@ -11,17 +11,14 @@ export class PostsController {
   getHello(): string {
     return 'this.postsService.getHello();'
   }
-  @Get('/app')
-  getlo(): Promise<{ postId: string; username: string; createdAt: Date; updatedAt: Date } | null> {
-    return this.prisma.posts.findUnique({
-      where: { postId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed' }
-    });
-  }
-
   @Get('/comments')
   async  getloo() {
     return await this.prisma.comment.findUnique({
       where: { commetId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8hlbbd4bed' }
     });
+  }
+  @Post('/photo')
+  async  addPhoto() {
+   return 'zalipa'
   }
 }
