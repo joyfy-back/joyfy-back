@@ -6,14 +6,12 @@ import { ConfigurationType } from './configs/configuration';
 async function bootstrap() {
   const app = await NestFactory.create(ContentModule);
   app.setGlobalPrefix('/api/v1');
-  
+
   const configService = app.get(ConfigService<ConfigurationType, true>);
   const apiSettings = configService.get('apiSettings', { infer: true });
   const dbSettings = configService.get('dbSettings', { infer: true });
 
-  console.log(dbSettings.CONTENT_DATABASE_URL)
-
-  await app.listen(apiSettings.PORT ?? 3022);
+  console.log(dbSettings.CONTENT_DATABASE_URL);
 }
 
 void bootstrap();
