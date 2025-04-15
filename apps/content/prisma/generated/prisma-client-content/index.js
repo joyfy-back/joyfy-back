@@ -130,7 +130,7 @@ const config = {
       "value": "prisma-client-js"
     },
     "output": {
-      "value": "E:\\internship\\apps\\content\\prisma\\generated\\prisma-client-content",
+      "value": "D:\\stag\\newStag\\joyfy-back\\apps\\content\\prisma\\generated\\prisma-client-content",
       "fromEnvVar": null
     },
     "config": {
@@ -148,7 +148,7 @@ const config = {
       }
     ],
     "previewFeatures": [],
-    "sourceFilePath": "E:\\internship\\apps\\content\\prisma\\schema.prisma",
+    "sourceFilePath": "D:\\stag\\newStag\\joyfy-back\\apps\\content\\prisma\\schema.prisma",
     "isCustomOutput": true
   },
   "relativeEnvPaths": {

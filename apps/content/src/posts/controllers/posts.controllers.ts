@@ -1,24 +1,26 @@
-import { Controller, Get, Post } from "@nestjs/common";
-import { PrismaService } from "../../../prisma/prisma.service"
+import { Controller } from '@nestjs/common';
+import { MessagePattern } from '@nestjs/microservices';
 
-
-
-@Controller('posts')
+@Controller()
 export class PostsController {
-  constructor(private prisma: PrismaService) { }
+  constructor() {}
 
-  @Get()
-  getHello(): string {
-    return 'this.postsService.getHello();'
-  }
-  @Get('/comments')
-  async  getloo() {
-    return await this.prisma.comment.findUnique({
-      where: { commetId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8hlbbd4bed' }
+  /*  @MessagePattern('pattern1')
+  method(data: { one: number }) {
+    data.one = data.one + 100000;
+    console.log('three step OR SECOND MICROCERVISE');
+    return data;
+  }*/
+
+  @MessagePattern('pattern1')
+  async method(data: { one: number }) {
+    const result = await new Promise((res) => {
+      setTimeout(() => {
+        res({ ok: 12345678 });
+      }, 8000);
     });
-  }
-  @Post('/photo')
-  async  addPhoto() {
-   return 'zalipa'
+
+    console.log('three step OR SECOND MICROCERVISE');
+    return result;
   }
 }
