@@ -39,6 +39,7 @@ model GithubUser {
   username  String
   email     String  @unique
   accountId String  @unique
+  isLogout      Boolean
   account   Account @relation(fields: [accountId], references: [accountId], onDelete: Cascade)
 
   @@map("github_user")
@@ -50,6 +51,7 @@ model GoogleUser {
   email     String  @unique
   avatar    String
   accountId String  @unique
+  isLogout      Boolean
   account   Account @relation(fields: [accountId], references: [accountId], onDelete: Cascade)
 
   @@map("googl_user")

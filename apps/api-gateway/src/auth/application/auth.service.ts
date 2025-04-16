@@ -193,11 +193,11 @@ export class AuthService {
 
     if(res.authProvider === 'google'){
       
-      await this.authRepository.deleteGoogleAccount(res.userId)
+      await this.authRepository.logoutGoogleAccount(res.userId)
 
     } else if(res.authProvider === 'github') {
 
-      await this.authRepository.deleteGitHubAccount(res.userId)
+      await this.authRepository.logoutGitHubAccount(res.userId)
 
     }
 
