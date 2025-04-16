@@ -7,6 +7,10 @@ import { Posts } from '../../../prisma/generated/prisma-client-content';
 export class PostRepository {
   constructor(protected prisma: PrismaService) {}
 
+  /*  async createPost(newPost: AddPost){
+      //return await this.prisma
+    }*/
+
   async createPost(newPost: AddPost): Promise<Posts> {
     return await this.prisma.posts.create({
       data: { ...newPost },

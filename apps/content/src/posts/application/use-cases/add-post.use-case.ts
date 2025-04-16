@@ -1,6 +1,7 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { AddPostData } from '../../../../../api-gateway/src/post/types/api-post-types';
 import { AddPost } from '../../types/post-types';
+import { PostRepository } from '../../infrastructure/post-repository';
 
 export class AddPostCommand {
   constructor(public data: AddPostData) {}
@@ -8,7 +9,7 @@ export class AddPostCommand {
 
 @CommandHandler(AddPostCommand)
 export class AddPostUseCase implements ICommandHandler<AddPostCommand> {
-  constructor() {}
+  constructor(protected postRepository: PostRepository) {}
 
   async execute(command: AddPostCommand): Promise<any> {
     const { addPostDto, username, userId } = command.data;
@@ -18,6 +19,8 @@ export class AddPostUseCase implements ICommandHandler<AddPostCommand> {
       userId,
       description: addPostDto.description,
     };
+
+    const post = await this.postRepository.createPost(newPost);
     return newPost;
   }
 }
