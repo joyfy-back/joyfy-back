@@ -9,11 +9,14 @@ async function bootstrap() {
     ContentModule,
     {
       transport: Transport.TCP,
+      options:{
+        host: '0.0.0.0',
+        port: 3836
+      }
     },
   );
 
   const configService = app.get(ConfigService<ConfigurationType, true>);
-  const apiSettings = configService.get('apiSettings', { infer: true });
   const dbSettings = configService.get('dbSettings', { infer: true });
 
   console.log(dbSettings.CONTENT_DATABASE_URL);

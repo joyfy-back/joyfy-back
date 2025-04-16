@@ -6,9 +6,12 @@ import { SharedModule } from './shared/shared.module';
 import { ApiPostModule } from './post/api-post.module';
 
 @Module({
-  imports: [SharedModule, AuthModule, ApiPostModule],
+  imports: [
+    SharedModule,
+    AuthModule,
+    ApiPostModule],
   controllers: [ApiGatewayController],
   providers: [ApiGatewayService],
   exports: [],
 })
-export class ApiGatewayModule {}
+export class ApiGatewayModule { }

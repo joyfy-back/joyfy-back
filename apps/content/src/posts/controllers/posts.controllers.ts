@@ -14,13 +14,8 @@ export class PostsController {
 
   @MessagePattern('pattern1')
   async method(data: { one: number }) {
-    const result = await new Promise((res) => {
-      setTimeout(() => {
-        res({ ok: 12345678 });
-      }, 8000);
-    });
 
     console.log('three step OR SECOND MICROCERVISE');
-    return result;
+    return { ok: 12345678 };
   }
 }
