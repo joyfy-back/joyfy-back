@@ -1,12 +1,11 @@
 import { Module } from '@nestjs/common';
 import { PostsController } from './controllers/posts.controllers';
-import { PostsService } from './application/posts.service';
-
-
+import { AddPostUseCase } from './application/use-cases/add-post.use-case';
+import { CqrsModule } from '@nestjs/cqrs';
 
 @Module({
-  imports: [],
+  imports: [CqrsModule],
   controllers: [PostsController],
-  providers: [PostsService],
+  providers: [AddPostUseCase],
 })
 export class PostModule {}
