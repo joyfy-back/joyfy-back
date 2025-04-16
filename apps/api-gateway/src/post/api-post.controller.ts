@@ -3,7 +3,7 @@ import { ClientProxy } from '@nestjs/microservices';
 
 @Controller('post')
 export class ApiPostController {
-  constructor(@Inject('API_POST_SERVICE') private client: ClientProxy) {}
+  constructor(@Inject('CONTENT-POST-SERVICE') private client: ClientProxy) {}
 
   /*  @Get()
     send() {
