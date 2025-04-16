@@ -137,7 +137,8 @@ export class AuthController {
   @ApiOperation({ summary: 'User login' })
   @ApiBody({ type: UserLoginInputDto })
   @ApiResponse({ status: 200, description: 'User logged in successfully.' })
-  @ApiResponse({ status: 401, description: 'Unauthorized.' })
+  @ApiResponse({ status: 400, description: 'Email or password is incorrect' })
+  @ApiResponse({ status: 401, description: 'Invalid token' })
   async login(
     @Body() dto: UserLoginInputDto,
     @Res() res: Response,
@@ -151,7 +152,7 @@ export class AuthController {
     if (!checkCredentials.success) {
       throw new HttpException({
         message: [{ message: 'Email or password is incorrect', field: 'email or password' }],
-      }, HttpStatus.UNAUTHORIZED);
+      }, HttpStatus.BAD_REQUEST);
     }
 
     const userAgent = req.headers['user-agent'] || 'unknown device';
@@ -200,7 +201,7 @@ export class AuthController {
   @ApiOperation({ summary: 'User logout' })
   @ApiBearerAuth()
   @ApiResponse({ status: 204, description: 'User logged out successfully.' })
-  @ApiResponse({ status: 401, description: 'Unauthorized.' })
+  @ApiResponse({ status: 401, description: 'Invalid token.' })
   async logout(@Request() req, @Res() res: Response) {
     const result: any =
       await this.authService.checkValidateUserSessionByRefreshToken(
@@ -272,7 +273,7 @@ export class AuthController {
       },
     },
   })
-  @ApiResponse({ status: 401, description: 'Unauthorized.' })
+  @ApiResponse({ status: 401, description: 'Invalid token' })
   @ApiCookieAuth('refreshToken')
   async refreshToken(@Res() res: Response, @Request() req) {
     const result =
@@ -282,7 +283,7 @@ export class AuthController {
 
     if (!result.success) {
       throw new HttpException({
-        message: [{ message: 'invalid token', field: 'email or password' }],
+        message: [{ message: 'invalid token', field: 'token' }],
       }, HttpStatus.UNAUTHORIZED);
     }
 
