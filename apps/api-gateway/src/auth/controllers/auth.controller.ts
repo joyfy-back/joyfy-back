@@ -48,6 +48,8 @@ import { CreateAccountUserGithubCommand } from '../application/use-cases/create-
 import { CreateAccountUserGoogleCommand } from '../application/use-cases/create-account.user.google.use-case';
 import { RecaptchaService } from '../application/recaptcha.service';
 import { PrismaService } from '../../../prisma/prisma.service';
+import { GoogleUser } from 'apps/api-gateway/prisma/generated/prisma-client-content';
+import { UpdateAccountUserGoogleCommand } from '../application/use-cases/upadte-account.user.google.use-case';
 
 @Controller('auth')
 export class AuthController {
@@ -165,7 +167,7 @@ export class AuthController {
     if (!tokens.success) {
       throw new HttpException('UNAUTHORIZED', HttpStatus.UNAUTHORIZED);
     }
-    
+
     res.cookie('refreshToken', tokens.data[0].refreshToken, {
       httpOnly: true,
       maxAge: 7 * 24 * 60 * 60 * 1000,
@@ -527,69 +529,80 @@ export class AuthController {
   async googleCallback(@Request() req, @Res() res: Response) {
     try {
       const userAgent = req.headers['user-agent'] || 'unknown device';
+      const clientIp = req.ip;
 
       if (!req.user) {
         throw new UnauthorizedException('Google authentication failed');
       }
 
-      const googleEmail = await this.authQueryRepository.getGoogleAccount(req.user.email)
+      const { email, username, googleId, avatar } = req.user;
+      const accountResult = await this.authQueryRepository.getGoogleAccount(email);
+      const existingUser = (accountResult.data as unknown as GoogleUser[])[0];
 
-      if (!googleEmail.success) {
-        throw new Error(googleEmail.message)
+      const setTokensCookies = (tokens: Result<TokensType>) => {
+        res.cookie('refreshToken', tokens.data[0].refreshToken, {
+          httpOnly: true,
+          maxAge: 7 * 24 * 60 * 60 * 1000, // 7 дней
+          sameSite: 'lax',
+          secure: true,
+          domain: '.joyfy.online',
+        });
+
+        res.cookie('accessToken', tokens.data[0].accessToken, {
+          httpOnly: true,
+          maxAge: 15 * 60 * 1000, // 15 минут
+          sameSite: 'lax',
+          secure: true,
+          domain: '.joyfy.online',
+        });
+      };
+
+      if (!existingUser) {
+        const createResult = await this.commandBuse.execute(
+          new CreateAccountUserGoogleCommand(email, username, googleId, avatar || 'default-avatar'),
+        );
+
+        if (!createResult.success) {
+          throw new Error('Registration failed');
+        }
+
+        const tokens = await this.commandBuse.execute(
+          new LoginUserCommand(googleId, username, userAgent, clientIp, email, true, false),
+        );
+
+        setTokensCookies(tokens);
+
+        await this.emailService.sendWelcomeEmail(email);
+
+        res.redirect(307, 'https://dev.joyfy.online/auth/google/login-success');
       }
 
+      const needsUpdate =
+        existingUser.username !== username ||
+        existingUser.googleId !== googleId ||
+        existingUser.avatar !== avatar;
 
-      const result = await this.commandBuse.execute(
-        new CreateAccountUserGoogleCommand(
-          req.user.email,
-          req.user.username,
-          req.user.googleId,
-          'fdfsdfsdf'
-        ),
-      );
-      if (!result.success) {
-        throw new Error('registration_failed')
+      if (needsUpdate) {
+        const updateResult = await this.commandBuse.execute(
+          new UpdateAccountUserGoogleCommand(email, username, avatar || existingUser.avatar),
+        );
+
+        if (!updateResult.success) {
+          throw new Error('Failed to update user account');
+        }
       }
 
-      const tokens: Result<TokensType> = await this.commandBuse.execute(
-        new LoginUserCommand(
-          req.user.googleId,
-          req.user.username,
-          userAgent,
-          req.ip,
-          req.user.email,
-          true,
-          false
-        ),
+      const tokens = await this.commandBuse.execute(
+        new LoginUserCommand(googleId, username, userAgent, clientIp, email, true, false),
       );
-      res.cookie('refreshToken', tokens.data[0].refreshToken, {
-        httpOnly: true,
-        maxAge: 7 * 24 * 60 * 60 * 1000,
-        sameSite: 'lax',
-        secure: true,
-        domain: '.joyfy.online',
-      });
 
-      res.cookie('accessToken', tokens.data[0].accessToken, {
-        httpOnly: true,
-        maxAge: 15 * 60 * 1000,
-        sameSite: 'lax',
-        secure: true,
-        domain: '.joyfy.online',
+      setTokensCookies(tokens);
 
-      });
-
-
-      this.emailService.sendWelcomeEmail(req.user.email)
-      res.redirect(307, 'https://dev.joyfy.online/auth/google/login-success')
-
-
+      res.redirect(307, 'https://dev.joyfy.online/auth/google/login-success');
     } catch (error) {
-
-      console.error('GitHub auth error:', error);
-      return res.redirect(
-        `https://dev.joyfy.online/auth/login?error=${error}`,
-      );
+      console.error('Google auth error:', error);
+      const errorMessage = encodeURIComponent(error.message || 'Authentication failed');
+     return res.redirect(`https://dev.joyfy.online/auth/login?error=${errorMessage}`);
     }
   }
 
