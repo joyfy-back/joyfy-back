@@ -2,7 +2,9 @@
 /dist
 /node_modules
 /build
-
+/apps/api-gateway/prisma/generated
+/apps/content/prisma/generated
+/apps/files/prisma/generated
 # Logs
 logs
 *.log
