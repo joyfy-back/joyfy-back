@@ -147,7 +147,9 @@ export class AuthController {
     );
 
     if (!checkCredentials.success) {
-      throw new HttpException('UNAUTHORIZED', HttpStatus.UNAUTHORIZED);
+      throw new HttpException({
+        message: [{ message: 'Email or password is incorrect', field: 'email or password' }],
+      }, HttpStatus.UNAUTHORIZED);
     }
 
     const userAgent = req.headers['user-agent'] || 'unknown device';
@@ -163,7 +165,9 @@ export class AuthController {
     );
 
     if (!tokens.success) {
-      throw new HttpException('UNAUTHORIZED', HttpStatus.UNAUTHORIZED);
+      throw new HttpException({
+        message: [{ message: 'invalid token', field: 'token' }],
+      }, HttpStatus.UNAUTHORIZED);
     }
     
     res.cookie('refreshToken', tokens.data[0].refreshToken, {
@@ -202,7 +206,9 @@ export class AuthController {
       );
 
     if (!result.success) {
-      throw new HttpException('UNAUTHORIZED', HttpStatus.UNAUTHORIZED);
+      throw new HttpException({
+        message: [{ message: 'invalid token', field: 'token' }],
+      }, HttpStatus.UNAUTHORIZED);
     }
 
     await this.commandBuse.execute(
@@ -273,7 +279,9 @@ export class AuthController {
       );
 
     if (!result.success) {
-      throw new HttpException('UNAUTHORIZED', HttpStatus.UNAUTHORIZED);
+      throw new HttpException({
+        message: [{ message: 'invalid token', field: 'email or password' }],
+      }, HttpStatus.UNAUTHORIZED);
     }
 
     const tokens = await this.authService.updateToken(req.cookies.accessToken);
