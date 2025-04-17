@@ -9,10 +9,10 @@ async function bootstrap() {
     ContentModule,
     {
       transport: Transport.TCP,
-      /*   options: {
+      options: {
         host: '0.0.0.0',
         port: 3836,
-      },*/
+      },
     },
   );
 

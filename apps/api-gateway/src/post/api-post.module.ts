@@ -8,10 +8,10 @@ import { ApiPostController } from './api-post.controller';
       {
         name: 'CONTENT-POST-SERVICE',
         transport: Transport.TCP,
-        /*  options: {
-        host: 'api-content-service-service',
-        port: 3836,
-      },*/
+        options: {
+          host: 'api-content-service-service',
+          port: 3836,
+        },
       },
     ]),
   ],

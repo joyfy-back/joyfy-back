@@ -1,7 +1,15 @@
 import { IsNotEmpty, IsString, Length } from 'class-validator';
 import { Transform, TransformFnParams } from 'class-transformer';
+import { ApiProperty } from '@nestjs/swagger';
 
 export class AddPostDto {
+  @ApiProperty({
+    description: 'Описание фотки',
+    type: String,
+    required: true,
+    minLength: 1,
+    maxLength: 500,
+  })
   @IsString()
   @IsNotEmpty({
     message: 'Value description  must  be not empty.',

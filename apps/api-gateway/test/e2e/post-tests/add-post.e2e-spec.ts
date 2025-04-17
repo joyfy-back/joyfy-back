@@ -43,58 +43,76 @@ describe('tests for andpoint /api/v1/post', () => {
     await app.close();
   });
 
-  it('registration  user', async () => {
-    await request(app.getHttpServer())
-      .post('/api/v1/auth/registration')
-      .send({
-        username: 'testuser',
-        email,
-        password,
-        agreeToTerms: true,
-        passwordConfirmation: 'Password123!',
-      })
-      .expect(201);
+  /*  it('registration  user', async () => {
+      await request(app.getHttpServer())
+        .post('/api/v1/auth/registration')
+        .send({
+          username: 'testuser',
+          email,
+          password,
+          agreeToTerms: true,
+          passwordConfirmation: 'Password123!',
+        })
+        .expect(201);
 
-    const itemUser = await prisma.user.findUnique({
-      where: { email },
+      const itemUser = await prisma.user.findUnique({
+        where: { email },
+      });
+      userId = itemUser?.userId;
+
+      const itemConfirmationCode = await prisma.emailConfirmation.findFirst({
+        where: { userId },
+      });
+
+      code = itemConfirmationCode?.confirmationCode;
+
+      //console.log('itemConfirmationCode', itemConfirmationCode);
     });
-    userId = itemUser?.userId;
 
-    const itemConfirmationCode = await prisma.emailConfirmation.findFirst({
-      where: { userId },
+    it('confirmation registration  user, expected OK ', async () => {
+      await request(app.getHttpServer())
+        .post('/api/v1/auth/registration-confirmation')
+        .send({ code })
+        .expect(204);
     });
 
-    code = itemConfirmationCode?.confirmationCode;
+    it('login  user, expected OK', async () => {
+      const res = await request(app.getHttpServer())
+        .post('/api/v1/auth/login')
+        .send({ email, password })
+        .expect(200);
 
-    //console.log('itemConfirmationCode', itemConfirmationCode);
-  });
+      const allCookies = res.headers['set-cookie'];
 
-  it('confirmation registration  user, expected OK ', async () => {
-    await request(app.getHttpServer())
-      .post('/api/v1/auth/registration-confirmation')
-      .send({ code })
-      .expect(204);
-  });
+      accessToken = allCookies[1].split('=')[1];
+      console.log(accessToken);
+    });*/
 
-  it('login  user, expected OK', async () => {
-    const res = await request(app.getHttpServer())
-      .post('/api/v1/auth/login')
-      .send({ email, password })
-      .expect(200);
+  /*для проверки создания поста
+    открыть базу данных
+    открыть постман
+    не раскоментировать тест поста
+    запустить тесты без теста поста и получить аксестокен
+    в постман в куки положить аксес токен
+    из постмана создавать посты и конролировать в базе
+    ------------закоментить можно в
+          ----api-post.module.ts    options: {
+          host: 'api-content-service-service',
+          port: 3836,
+        },
+        ----- принимающий микросервис в main.ts
+             options: {
+        host: '0.0.0.0',
+        port: 3836,
+      },*/
 
-    const allCookies = res.headers['set-cookie'];
+  /*  it('add post ', async () => {
+      const res = await request(app.getHttpServer())
+        .post('/api/v1/post')
+        .set('Cookie', `accessToken=${accessToken}`)
+        .send({ description: 'поле чудес' })
+        .expect(201);
 
-    accessToken = allCookies[1].split('=')[1];
-    console.log(accessToken);
-  });
-
-  it('add post ', async () => {
-    const res = await request(app.getHttpServer())
-      .post('/api/v1/post')
-      .set('Cookie', `accessToken=${accessToken}`)
-      .send({ description: 'поле чудес' })
-      .expect(201);
-
-    console.log('res.body-TEST', res.body);
-  }, 20000);
+      console.log('res.body-TEST', res.body);
+    }, 20000);*/
 });

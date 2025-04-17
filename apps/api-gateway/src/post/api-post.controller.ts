@@ -15,13 +15,17 @@ import { Response } from 'express';
 import { AddPostDto } from './dto/add-post-dto';
 import { lastValueFrom } from 'rxjs';
 import { AddPostData } from './types/api-post-types';
+import { SwaggerAddPost } from './swagger/swagger-add-post.decorator';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Posts')
 @Controller('post')
 export class ApiPostController {
   constructor(@Inject('CONTENT-POST-SERVICE') private client: ClientProxy) {}
 
   @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.CREATED)
+  @SwaggerAddPost()
   @Post()
   async apiAddPost(
     @Res() res: Response,

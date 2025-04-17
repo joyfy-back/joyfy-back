@@ -1,15 +1,11 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../../../prisma/prisma.service';
+import { PostPrismaService } from '../../../prisma/prisma.service';
 import { AddPost } from '../types/post-types';
 import { Posts } from '../../../prisma/generated/prisma-client-content';
 
 @Injectable()
 export class PostRepository {
-  constructor(protected prisma: PrismaService) {}
-
-  /*  async createPost(newPost: AddPost){
-      //return await this.prisma
-    }*/
+  constructor(protected prisma: PostPrismaService) {}
 
   async createPost(newPost: AddPost): Promise<Posts> {
     return this.prisma.posts.create({
