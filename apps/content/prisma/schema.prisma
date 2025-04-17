@@ -11,8 +11,8 @@ datasource db {
 
 model Posts {
   postId      String   @id @default(uuid())
-  username    String   @unique
-  userId      String   @unique
+  username    String
+  userId      String
   description String
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt

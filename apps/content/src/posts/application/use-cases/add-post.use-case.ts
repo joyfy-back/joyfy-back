@@ -2,6 +2,7 @@ import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { AddPostData } from '../../../../../api-gateway/src/post/types/api-post-types';
 import { AddPost } from '../../types/post-types';
 import { PostRepository } from '../../infrastructure/post-repository';
+import { Posts } from '../../../../prisma/generated/prisma-client-content';
 
 export class AddPostCommand {
   constructor(public data: AddPostData) {}
@@ -11,7 +12,7 @@ export class AddPostCommand {
 export class AddPostUseCase implements ICommandHandler<AddPostCommand> {
   constructor(protected postRepository: PostRepository) {}
 
-  async execute(command: AddPostCommand): Promise<any> {
+  async execute(command: AddPostCommand): Promise<Posts> {
     const { addPostDto, username, userId } = command.data;
 
     const newPost: AddPost = {
@@ -20,8 +21,7 @@ export class AddPostUseCase implements ICommandHandler<AddPostCommand> {
       description: addPostDto.description,
     };
 
-    const post = await this.postRepository.createPost(newPost);
-    return newPost;
+    return this.postRepository.createPost(newPost);
   }
 }
 

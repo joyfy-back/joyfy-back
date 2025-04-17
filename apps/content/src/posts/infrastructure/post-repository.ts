@@ -12,15 +12,8 @@ export class PostRepository {
     }*/
 
   async createPost(newPost: AddPost): Promise<Posts> {
-    return await this.prisma.posts.create({
+    return this.prisma.posts.create({
       data: { ...newPost },
     });
   }
 }
-
-/*
-async registrationUser(newUser: User): Promise<User> {
-  return await this.prisma.user.create({
-    data: { ...newUser },
-  });
-}*/
