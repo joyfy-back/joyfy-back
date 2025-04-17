@@ -18,7 +18,7 @@ export class UserNameIsExistConstraint implements ValidatorConstraintInterface {
     return !success;
   }
   defaultMessage() {
-    return 'Username already exists';
+    return 'This username is already taken';
   }
 
 }
