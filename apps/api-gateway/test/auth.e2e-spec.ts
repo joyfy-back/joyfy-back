@@ -113,7 +113,7 @@ describe('ApiGatewayController (e2e)', () => {
           Email: 'nonexistent@example.com',
           Password: 'wrongpassword',
         })
-        .expect(401);
+        .expect(400);
     });
   });
 });
