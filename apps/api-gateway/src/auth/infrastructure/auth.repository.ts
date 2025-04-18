@@ -6,10 +6,11 @@ import { CreateAccountUserGithubCommand } from '../application/use-cases/create-
 import { CreateAccountUserGoogleCommand } from '../application/use-cases/create-account.user.google.use-case';
 import { PrismaService } from '../../../prisma/prisma.service';
 import { DeviceSessions, User } from 'apps/api-gateway/prisma/generated/prisma-client-content';
+import { UpdateAccountUserGoogleCommand } from '../application/use-cases/upadte-account.user.google.use-case';
 
 @Injectable()
 export class AuthRepository {
-  constructor(protected prisma: PrismaService) {}
+  constructor(protected prisma: PrismaService) { }
 
   async createUser(dto: UserType, account: any): Promise<Result<User>> {
     try {
@@ -165,6 +166,7 @@ export class AuthRepository {
             username: dto.username,
             email: dto.email,
             accountId: account.accountId,
+            isLogout: false
           },
         });
 
@@ -202,6 +204,8 @@ export class AuthRepository {
             email: dto.email,
             avatar: dto.avatar || 'opa',
             accountId: account.accountId,
+            isLogout: false,
+            
           },
         });
 
@@ -371,6 +375,34 @@ export class AuthRepository {
         message: 'error during update',
         data: [],
       };
+    }
+  }
+
+  async updateAccountUserGoogle(dto: UpdateAccountUserGoogleCommand) {
+    try {
+      await this.prisma.googleUser.update({
+        where: { email: dto.email },
+        data: {
+          username: dto.username,
+          avatar: dto.avatar,
+          isLogout: false,
+        }
+      })
+
+      return {
+        success: true,
+        message: '',
+        data: [],
+      }
+    } catch (error) {
+
+      console.log(error)
+      return {
+        success: false,
+        message: '',
+        data: [],
+      }
+
     }
   }
 
@@ -559,14 +591,17 @@ export class AuthRepository {
     }
   }
 
-  async deleteGoogleAccount(googleId: string) {
-    await this.prisma.account.deleteMany({
-      where: { GooglebUser: { googleId } },
+  async logoutGoogleAccount(googleId: string) {
+    await this.prisma.googleUser.updateMany({
+      where: { googleId },
+      data: { isLogout: true },
     });
   }
-  
-  async deleteGitHubAccount(gitHubId: string) {
-    await this.prisma.account.deleteMany({
-      where: { GithubUser: { githubId: gitHubId } },
+
+  async logoutGitHubAccount(gitHubId: string) {
+    await this.prisma.githubUser.updateMany({
+      where: { githubId: gitHubId },
+      data: { isLogout: true },
     });
-  }}
+  }
+}

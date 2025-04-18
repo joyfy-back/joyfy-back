@@ -4,26 +4,25 @@ import { formatErrorMessage } from '../../../shared/libs/format-error-message';
 import { Result } from '../../../../../../libs/shared/types';
 import { JwtService } from '@nestjs/jwt';
 
-export class CreateAccountUserGithubCommand {
+export class UpdateAccountUserGoogleCommand {
   constructor(
     public email: string,
     public username: string,
-    public githubId: string,
+    public avatar: string,
   ) {}
 }
 
-@CommandHandler(CreateAccountUserGithubCommand)
-export class CreateAccountUserGithubUseCase
-  implements ICommandHandler<CreateAccountUserGithubCommand>
+@CommandHandler(UpdateAccountUserGoogleCommand)
+export class UpdateAccountUserGoogleUseCase
+  implements ICommandHandler<UpdateAccountUserGoogleCommand>
 {
   constructor(
     protected authRepository: AuthRepository,
     protected jwtService: JwtService,
   ) {}
-  async execute(dto: CreateAccountUserGithubCommand): Promise<Result<any>> {
+  async execute(dto: UpdateAccountUserGoogleCommand): Promise<Result<any>> {
     try {
-      
-      const result = await this.authRepository.createAccountAndGithubUser(dto);
+      const result = await this.authRepository.updateAccountUserGoogle(dto);
 
       if (!result.success) {
         throw new Error();
@@ -31,7 +30,7 @@ export class CreateAccountUserGithubUseCase
 
       return {
         success: true,
-        message: 'the user was created successfully',
+        message: '',
         data: [result],
       };
     } catch (error: unknown) {

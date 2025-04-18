@@ -119,51 +119,68 @@ export class AuthQueryRepository {
       const githubUser = await this.prisma.githubUser.findUnique({
         where: { email }
       });
-  
+
       if (githubUser) {
-        throw new Error('user_exists')
+        return {
+          success: true,
+          message:
+            'user_exists',
+          data: [githubUser],
+        };
       }
-  
-      return {
-        success: true,
-        message: '',
-        data: [],
-      };
-  
-    } catch (error) {
+
       return {
         success: false,
-        message: error,
+        message:
+          'ok',
         data: [],
-      };
 
-      
+      }
+
+    } catch (error) {
+      console.log(error)
+
+      return {
+        success: false,
+        message:
+          'ok',
+        data: [],
+      }
     }
   }
   async getGoogleAccount(email: string) {
     try {
-      const githubUser = await this.prisma.googleUser.findUnique({
-        where: { email }
+      const googleUser = await this.prisma.googleUser.findFirst({
+        where: {
+          email,
+        },
       });
-
-      if (githubUser) {
-        throw new Error()
+      if (googleUser) {
+        return {
+          success: true,
+          message:
+            'user_exists',
+          data: [googleUser],
+        };
       }
 
-      return {
-        success: true,
-        message:
-          'ok',
-        data: [githubUser],
-
-      }
-    } catch (error) {
       return {
         success: false,
         message:
-          'user_exists',
+          'ok',
         data: [],
-      };
+
+      }
+    } catch (error) {
+      console.log(error)
+
+      return {
+        success: false,
+        message:
+          'ok',
+        data: [],
+
+      }
     }
 
   }

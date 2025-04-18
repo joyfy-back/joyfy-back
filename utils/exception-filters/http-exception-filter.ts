@@ -75,6 +75,21 @@ export class AllExceptionsFilter implements ExceptionFilter {
         }
 
         response.status(exception.getStatus()).json(errorsResponse);
+      } else if (exception.getStatus() === HttpStatus.UNAUTHORIZED) {
+        const errorsResponse: { errorsMessages: string[] } = {
+          errorsMessages: [],
+        };
+
+        const responseBody: any = exception.getResponse();
+
+        if (Array.isArray(responseBody.message)) {
+          responseBody.message.forEach((e) =>
+            errorsResponse.errorsMessages.push(e),
+          );
+        } else {
+          errorsResponse.errorsMessages.push(responseBody.message);
+        }
+        response.status(exception.getStatus()).json(errorsResponse);
       } else {
         response.status(exception.getStatus()).send({
           statusCode: exception.getStatus(),
@@ -87,7 +102,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
         message: (exception as Error).message,
         stack: (exception as Error).stack, // Добавляем стек вызовов
       })
-      response.status(500).send("Опс... Сервер умер ");
+      response.status(500).send("Internal server error ");
     }
   }
 }
