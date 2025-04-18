@@ -27,7 +27,7 @@
     "test:files:e2e": "jest --config ./apps/files/test/jest-e2e.json",
     "build:api-gateway": "prisma generate --schema=apps/api-gateway/prisma/schema.prisma && nest build api-gateway",
     "start:api-gateway": "node dist/apps/api-gateway/main",
-    "start:dev:api-gateway": "npx prisma generate --schema=./apps/api-gateway/prisma/schema.prisma && npx dotenv -e .env -- nest start api-gateway --watch", 
+    "start:dev:api-gateway": "npx prisma generate --schema=./apps/api-gateway/prisma/schema.prisma && npx dotenv -e .env -- nest start api-gateway --debug --watch", 
     "build:content": "npx prisma generate --schema=./apps/content/prisma/schema.prisma && nest build content",
     "start:content": "node dist/apps/content/main",
     "start:dev:content": "npx prisma generate --schema=./apps/content/prisma/schema.prisma && npx dotenv -e .env -- nest start content --watch", 
