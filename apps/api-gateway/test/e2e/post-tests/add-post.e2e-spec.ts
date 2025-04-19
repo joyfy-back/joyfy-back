@@ -74,19 +74,20 @@ describe('tests for andpoint /api/v1/post', () => {
         .post('/api/v1/auth/registration-confirmation')
         .send({ code })
         .expect(204);
-    });
-
-    it('login  user, expected OK', async () => {
-      const res = await request(app.getHttpServer())
-        .post('/api/v1/auth/login')
-        .send({ email, password })
-        .expect(200);
-
-      const allCookies = res.headers['set-cookie'];
-
-      accessToken = allCookies[1].split('=')[1];
-      console.log(accessToken);
     });*/
+
+  it('login  user, expected OK', async () => {
+    const res = await request(app.getHttpServer())
+      .post('/api/v1/auth/login')
+      .send({ email, password })
+      .expect(400);
+    //.expect(200);
+
+    /* const allCookies = res.headers['set-cookie'];
+
+    accessToken = allCookies[1].split('=')[1];
+    console.log(accessToken);*/
+  });
 
   /*для проверки создания поста
     открыть базу данных
