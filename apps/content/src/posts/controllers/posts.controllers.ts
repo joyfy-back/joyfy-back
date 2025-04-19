@@ -1,21 +1,16 @@
 import { Controller } from '@nestjs/common';
 import { MessagePattern } from '@nestjs/microservices';
+import { AddPostData } from '../../../../api-gateway/src/post/types/api-post-types';
+import { CommandBus } from '@nestjs/cqrs';
+import { AddPostCommand } from '../application/use-cases/add-post.use-case';
+import { Posts } from '../../../prisma/generated/prisma-client-content';
 
 @Controller()
 export class PostsController {
-  constructor() {}
-
-  /*  @MessagePattern('pattern1')
-  method(data: { one: number }) {
-    data.one = data.one + 100000;
-    console.log('three step OR SECOND MICROCERVISE');
-    return data;
-  }*/
+  constructor(protected commandBus: CommandBus) {}
 
   @MessagePattern('pattern1')
-  async method(data: { one: number }) {
-
-    console.log('three step OR SECOND MICROCERVISE');
-    return { ok: 12345678 };
+  async addPost(data: AddPostData): Promise<Posts> {
+    return this.commandBus.execute(new AddPostCommand(data));
   }
 }

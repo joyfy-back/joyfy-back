@@ -1,5 +1,5 @@
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
   binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
   output        = "./generated/prisma-client-content"
 }
@@ -10,19 +10,21 @@ datasource db {
 }
 
 model Posts {
-  postId            String             @id @default(uuid())
-  username          String             @unique
-  createdAt         DateTime           @default(now())
-  updatedAt         DateTime           @updatedAt
+  postId      String   @id @default(uuid())
+  username    String
+  userId      String
+  description String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   @@map("posts")
 }
 
 model Comment {
-  commetId            String             @id @default(uuid())
-  username          String             @unique
-  createdAt         DateTime           @default(now())
-  updatedAt         DateTime           @updatedAt
+  commetId  String   @id @default(uuid())
+  username  String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@map("comments")
 }

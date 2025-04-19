@@ -1,32 +1,45 @@
-import { Controller, Get, Inject } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  HttpCode,
+  HttpStatus,
+  Inject,
+  Post,
+  Request,
+  Res,
+  UseGuards,
+} from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
+import { JwtAuthGuard } from '../auth/strategy/jwt.strategy';
+import { Response } from 'express';
+import { AddPostDto } from './dto/add-post-dto';
+import { lastValueFrom } from 'rxjs';
+import { AddPostData } from './types/api-post-types';
+import { SwaggerAddPost } from './swagger/swagger-add-post.decorator';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Posts')
 @Controller('post')
 export class ApiPostController {
   constructor(@Inject('CONTENT-POST-SERVICE') private client: ClientProxy) {}
 
-  /*  @Get()
-    send() {
-      const obj = { one: 5 };
-      const pattern = 'pattern1';
-      console.log('one step', obj);
-  
-      const result = this.client.send(pattern, obj);
-      console.log('two step', result);
-  
-      return result;
-    }
-  }*/
-
-  @Get()
-  async send() {
-    const obj = { one: 5 };
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(HttpStatus.CREATED)
+  @SwaggerAddPost()
+  @Post()
+  async apiAddPost(
+    @Res() res: Response,
+    @Body() addPostDto: AddPostDto,
+    @Request() req,
+  ) {
     const pattern = 'pattern1';
-    console.log('one step', obj);
 
-    const result = await this.client.send(pattern, obj);
-    console.log('two step', result);
+    const { userId, username } = req.user;
 
-    return result;
+    const data: AddPostData = { userId, username, addPostDto };
+
+    const result = await lastValueFrom(this.client.send(pattern, data));
+
+    return res.json(result);
   }
 }
